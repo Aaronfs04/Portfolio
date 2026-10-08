@@ -1,0 +1,259 @@
+.hero-page {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Posisi responsif: padding-left dan padding-right seimbang */
+  padding-left: clamp(6vw, 14vw, 18vw);
+  padding-right: clamp(8vw, 15vw, 18vw);
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hero-title-group {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  /* Jarak antar nama dan profesi yang responsif */
+  gap: clamp(0.5rem, 0.4rem + 0.4vw, 1rem);
+}
+
+.hero-title {
+  /* Ukuran font judul yang responsif dan proporsional (dari HP ~32px, Laptop ~46px, hingga Monitor 1920px ~52px) */
+  font-size: clamp(2rem, 1.2rem + 2vw, 3.25rem);
+  font-weight: 500;
+  color: #111111;
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.hero-subtitle {
+  /* Ukuran font subjudul yang responsif */
+  font-size: clamp(0.9rem, 0.75rem + 0.35vw, 1.15rem);
+  font-weight: 500;
+  color: #9ca3af; /* Warna abu-abu elegan persis referensi */
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.hero-buttons {
+  display: flex;
+  /* Jarak antar tombol yang menyesuaikan dinamis */
+  gap: clamp(6px, 0.5vw, 10px);
+  /* Jarak dari teks ke tombol responsif */
+  margin-top: clamp(2.25rem, 1.5rem + 2vw, 4rem);
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Ukuran kotak tombol yang responsif dan proporsional (dibesarkan sesuai request) */
+  width: clamp(52px, 3.8vw, 68px);
+  height: clamp(52px, 3.8vw, 68px);
+  border-radius: clamp(14px, 1vw, 18px);
+  background-color: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  color: #111111;
+  padding: 0;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+}
+
+.icon-btn:hover {
+  transform: translateY(-2px);
+  background-color: #fbfbfb;
+}
+
+.icon-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-icon {
+  /* Ukuran ikon di dalam kotak yang menyesuaikan (dibesarkan sedikit) */
+  width: clamp(20px, 1.4vw, 26px);
+  height: clamp(20px, 1.4vw, 26px);
+  color: #111111;
+}
+
+/* ==========================================================================
+   PENYESUAIAN TAMBAHAN (TABLET & MOBILE)
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .hero-page {
+    padding-left: 10vw;
+    padding-right: 8vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-page {
+    padding-left: 6vw;
+    padding-right: 6vw;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* ==========================================================================
+   PROJECT CARD (RIGHT COLUMN)
+   ========================================================================== */
+
+.hero-projects {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d;
+}
+
+/* 3D Peeking Cards (Bayangan kartu proyek atas & bawah seperti di referensi) */
+.project-peek {
+  position: absolute;
+  width: clamp(240px, 23vw, 390px);
+  aspect-ratio: 1 / 1;
+  border-radius: clamp(14px, 1.5vw, 24px);
+  background-color: #e5e7eb;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.project-peek-top {
+  top: 0;
+  transform: translateY(-90%) rotateX(-55deg) scale(0.92);
+  transform-origin: bottom center;
+  opacity: 0.7;
+}
+
+.project-peek-bottom {
+  bottom: 0;
+  transform: translateY(90%) rotateX(55deg) scale(0.92);
+  transform-origin: top center;
+  opacity: 0.7;
+}
+
+.project-card-slot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.project-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: clamp(14px, 1.5vw, 24px);
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  background-color: #e5e7eb;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.project-card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  transition: transform 0.5s ease;
+}
+
+.project-card:hover .project-card-bg {
+  transform: scale(1.05);
+}
+
+.project-card-video-wrapper {
+  position: relative;
+  width: 75%;
+  border-radius: 6px;
+  overflow: hidden;
+  z-index: 2;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.project-card-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.project-card-title {
+  position: absolute;
+  bottom: clamp(1rem, 2vw, 2rem);
+  left: clamp(1rem, 2vw, 2rem);
+  color: white;
+  z-index: 3;
+  font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Titik-titik Navigasi (Pagination Dots di Sisi Kanan Mentok Layar) */
+.project-pagination-dots {
+  position: absolute;
+  right: clamp(0.5rem, 1vw, 1.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  z-index: 20;
+}
+
+.project-pagination-dots .dot {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background-color: #d1d5db;
+  transition: all 0.3s ease;
+}
+
+.project-pagination-dots .dot.active {
+  background-color: #111111;
+  transform: scale(1.15);
+}
+
+/* Penyesuaian saat di HP agar tumpuk (kolom) */
+@media (max-width: 1024px) {
+  .hero-page {
+    flex-direction: column;
+    justify-content: center;
+    gap: 4rem;
+  }
+  .hero-content {
+    align-items: center;
+    text-align: center;
+  }
+  .hero-buttons {
+    justify-content: center;
+  }
+}
