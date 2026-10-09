@@ -45,6 +45,8 @@
   color: #9ca3af; /* Tetap abu-abu atau bisa diganti hitam jika diminta */
 }
 
+
+
 .hero-title {
   font-size: clamp(2rem, 1.2rem + 2vw, 3.25rem);
   font-weight: 500;

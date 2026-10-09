@@ -29,26 +29,36 @@ export const PROJECTS: Project[] = [
     tech: "Python, TensorFlow, PyTorch",
     link: import.meta.env.VITE_PROJECT_DEEP_LEARNING_URL || 'https://draw-it-right.vercel.app/',
   },
+];
+
+export const ACHIEVEMENT_DATA: Project[] = [
   {
-    id: 3,
-    title: 'Coming Soon!',
-    subtitle: 'Upcoming Project',
+    id: 101,
+    title: '',
     bg: '',
     video: '',
-    tag: 'Concept',
-    description: 'A new creative exploration in progress. Full case study and interactive live preview will be available soon.',
-    link: '#',
   },
   {
-    id: 4,
-    title: 'Coming Soon!',
-    subtitle: 'Upcoming Project',
+    id: 102,
+    title: '',
     bg: '',
     video: '',
-    tag: 'Concept',
-    description: 'A new creative exploration in progress. Full case study and interactive live preview will be available soon.',
-    link: '#',
+  }
+];
+
+export const PUBLICATION_DATA: Project[] = [
+  {
+    id: 201,
+    title: '',
+    bg: '',
+    video: '',
   },
+  {
+    id: 202,
+    title: '',
+    bg: '',
+    video: '',
+  }
 ];
 
 export interface ProjectCarouselProps {
@@ -57,6 +67,8 @@ export interface ProjectCarouselProps {
   onToggleProjectInfo?: () => void;
   isPersonalInfoOpen?: boolean;
   isProjectInfoOpen?: boolean;
+  category?: 'project' | 'achievement' | 'publication';
+  isCategoryTransitioning?: boolean;
 }
 
 export function ProjectCarousel({ 
@@ -64,7 +76,9 @@ export function ProjectCarousel({
   onProjectClick,
   onToggleProjectInfo,
   isPersonalInfoOpen = false,
-  isProjectInfoOpen = false
+  isProjectInfoOpen = false,
+  category = 'project',
+  isCategoryTransitioning = false
 }: ProjectCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const isScrolling = useRef(false);
@@ -95,6 +109,25 @@ export function ProjectCarousel({
     mouseY.set(0);
   };
 
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    // Set to false after a slight delay to cover initial mount
+    const timer = setTimeout(() => {
+      isFirstRender.current = false;
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const currentData = category === 'achievement' ? ACHIEVEMENT_DATA
+                    : category === 'publication' ? PUBLICATION_DATA
+                    : PROJECTS;
+
+  // Jika hanya ada 2 project, kita gandakan menjadi 4 di virtual render 
+  // agar animasi melingkar (atas & bawah) memiliki elemen DOM yang cukup untuk bertransisi mulus
+  const renderedProjects = currentData.length === 2 
+    ? [...currentData.map(p => ({...p, renderId: p.id + '_1'})), ...currentData.map(p => ({...p, renderId: p.id + '_2'}))]
+    : currentData.map(p => ({...p, renderId: p.id.toString()}));
+
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (isScrolling.current || expandedProject !== null || isPersonalInfoOpen) return;
@@ -102,19 +135,19 @@ export function ProjectCarousel({
       if (e.deltaY > 40) {
         // Scroll down -> next project
         isScrolling.current = true;
-        setActiveIndex((prev) => (prev + 1) % PROJECTS.length);
+        setActiveIndex((prev) => (prev + 1) % renderedProjects.length);
         setTimeout(() => (isScrolling.current = false), 1000);
       } else if (e.deltaY < -40) {
         // Scroll up -> prev project
         isScrolling.current = true;
-        setActiveIndex((prev) => (prev === 0 ? PROJECTS.length - 1 : prev - 1));
+        setActiveIndex((prev) => (prev === 0 ? renderedProjects.length - 1 : prev - 1));
         setTimeout(() => (isScrolling.current = false), 1000);
       }
     };
 
     window.addEventListener('wheel', handleWheel);
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [activeIndex, expandedProject, isPersonalInfoOpen]);
+  }, [activeIndex, expandedProject, isPersonalInfoOpen, renderedProjects.length]);
 
   // Fungsi untuk mendapatkan perbedaan indeks secara melingkar (circular)
   const getWrappedDiff = (i: number, active: number, length: number) => {
@@ -137,13 +170,13 @@ export function ProjectCarousel({
         }}
         initial={{ y: '-100vh', rotateX: -80, scale: 0.9, opacity: 0 }}
         animate={{ y: 0, rotateX: 0, scale: 1, opacity: 1 }}
-        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 2.2 }}
+        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 3.0 }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
         <div style={{ position: 'relative', width: 'clamp(260px, 24vw, 420px)', aspectRatio: '1 / 1', transformStyle: 'preserve-3d' }}>
-          {PROJECTS.map((proj, i) => {
-            const diff = getWrappedDiff(i, activeIndex, PROJECTS.length);
+          {renderedProjects.map((proj, i) => {
+            const diff = getWrappedDiff(i, activeIndex, renderedProjects.length);
             const isActive = diff === 0;
 
             // Tentukan posisi 3D berdasarkan kedudukannya relatif terhadap activeIndex
@@ -159,7 +192,7 @@ export function ProjectCarousel({
             const z = radius * Math.cos(angleRad) - radius;
             const rotateX = angle;
 
-            const isExpanded = expandedProject === proj.id;
+            const isExpanded = expandedProject === proj.id && isActive;
             const isAnyExpanded = expandedProject !== null;
 
             // Opacity: hilangkan kartu yang terlalu jauh di belakang atau saat yang lain di-expand atau saat personal info terbuka
@@ -177,7 +210,7 @@ export function ProjectCarousel({
             const animRotateX = isExpanded ? 0 : rotateX;
             const animScale = isExpanded ? 1.75 : (isActive ? 1 : 0.95);
 
-            if (isPersonalInfoOpen) {
+            if (isPersonalInfoOpen || isCategoryTransitioning) {
               if (isActive) {
                 animX = '60vw'; // Keluar bergeser ke kanan
               } else if (diff < 0) {
@@ -189,8 +222,16 @@ export function ProjectCarousel({
 
             return (
               <motion.div
-                key={proj.id}
+                key={proj.renderId}
                 className="project-card-slot"
+                initial={isFirstRender.current ? false : {
+                  x: isActive ? '60vw' : 0,
+                  y: isActive ? 0 : (diff < 0 ? '-70vh' : '70vh'),
+                  z: z,
+                  rotateX: rotateX,
+                  scale: animScale,
+                  opacity: opacity,
+                }}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -198,11 +239,11 @@ export function ProjectCarousel({
                   width: '100%',
                   height: '100%',
                   transformOrigin: 'center center',
-                  pointerEvents: (!isPersonalInfoOpen && (isActive || isExpanded)) ? 'auto' : 'none',
-                  cursor: (!isPersonalInfoOpen && (isActive || isExpanded)) ? 'pointer' : 'default',
+                  pointerEvents: (!isPersonalInfoOpen && !isCategoryTransitioning && (isActive || isExpanded)) ? 'auto' : 'none',
+                  cursor: (!isPersonalInfoOpen && !isCategoryTransitioning && (isActive || isExpanded)) ? 'pointer' : 'default',
                 }}
                 onClick={() => {
-                  if (isPersonalInfoOpen) return;
+                  if (isPersonalInfoOpen || isCategoryTransitioning) return;
                   if (isExpanded) {
                     if (onToggleProjectInfo) {
                       onToggleProjectInfo();
@@ -250,29 +291,35 @@ export function ProjectCarousel({
         className="project-pagination-dots"
         initial={{ opacity: 0, x: 20 }}
         animate={{ 
-          opacity: (expandedProject || isPersonalInfoOpen) ? 0 : 1, 
-          x: (expandedProject || isPersonalInfoOpen) ? 40 : 0 
+          opacity: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 0 : 1, 
+          x: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 40 : 0 
         }}
         transition={{ 
-          delay: (expandedProject || isPersonalInfoOpen) ? 0 : (expandedProject === null ? 0.2 : 2.8), 
+          delay: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 0 : (expandedProject === null ? 0.2 : 2.8), 
           duration: 0.8,
           ease: [0.16, 1, 0.3, 1]
         }}
-        style={{ pointerEvents: (expandedProject || isPersonalInfoOpen) ? 'none' : 'auto' }}
+        style={{ pointerEvents: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 'none' : 'auto' }}
       >
-        {PROJECTS.map((_, i) => (
-          <span
-            key={i}
-            className={`dot ${i === activeIndex ? 'active' : ''}`}
-            onClick={() => {
-              if (isScrolling.current || expandedProject !== null) return;
-              isScrolling.current = true;
-              setActiveIndex(i);
-              setTimeout(() => (isScrolling.current = false), 1000);
-            }}
-            style={{ cursor: 'pointer' }}
-          />
-        ))}
+        {currentData.map((_, i) => {
+          const isDotActive = (activeIndex % currentData.length) === i;
+          return (
+            <span
+              key={i}
+              className={`dot ${isDotActive ? 'active' : ''}`}
+              onClick={() => {
+                if (isScrolling.current || expandedProject !== null) return;
+                if (isDotActive) return; // Already active
+                
+                isScrolling.current = true;
+                // Since there are only 2 projects, if it's not active, it's just the next one
+                setActiveIndex((prev) => (prev + 1) % renderedProjects.length);
+                setTimeout(() => (isScrolling.current = false), 1000);
+              }}
+              style={{ cursor: 'pointer' }}
+            />
+          );
+        })}
       </motion.div>
     </>
   );

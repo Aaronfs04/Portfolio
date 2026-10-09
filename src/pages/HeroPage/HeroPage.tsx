@@ -4,7 +4,7 @@ import { ScrambleText } from '../../components/ScrambleText'
 import { ProjectCarousel, PROJECTS } from '../../components/ProjectCarousel'
 import { SocialButtons } from '../../components/SocialButtons'
 import { PersonalPage } from '../PersonalPage/PersonalPage'
-
+import { Menu, Category } from '../../components/Menu/Menu'
 import './HeroPage.css'
 
 const textVariants = {
@@ -31,6 +31,11 @@ function HeroPage() {
   const [personalScrollY, setPersonalScrollY] = useState(0)
   const [isSocialsOpen, setIsSocialsOpen] = useState(false)
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false)
+  
+  const [activeCategory, setActiveCategory] = useState<Category>('project')
+  const [displayedCategory, setDisplayedCategory] = useState<Category>('project')
+  const [isCategoryTransitioning, setIsCategoryTransitioning] = useState(false)
+
   const hasOpenedProject = useRef(false)
   if (expandedProject !== null) {
     hasOpenedProject.current = true
@@ -45,6 +50,16 @@ function HeroPage() {
   const handlePersonalScroll = useCallback((y: number) => {
     setPersonalScrollY(y)
   }, [])
+
+  const handleCategoryChange = (newCategory: Category) => {
+    if (newCategory === displayedCategory || isCategoryTransitioning) return
+    setActiveCategory(newCategory)
+    setIsCategoryTransitioning(true)
+    setTimeout(() => {
+      setDisplayedCategory(newCategory)
+      setIsCategoryTransitioning(false)
+    }, 1000)
+  }
 
   // --- Magnetic Y Cursor untuk tombol Minimize ---
   const mouseY = useMotionValue(0)
@@ -64,16 +79,16 @@ function HeroPage() {
     }
     window.addEventListener('mousemove', handleMouseMove)
 
-    // Kata-kata scramble selesai di detik ~1.5s, teks bergeser di 1.7s
+    // Teks bergeser diperlambat 0.5s agar diam dulu setelah scramble selesai
     const shiftTimer = setTimeout(() => {
       setHasShifted(true)
-    }, 1700)
+    }, 2200)
 
-    // Tombol muncul segera setelah teks mulai bergeser (2.0s)
+    // Tombol muncul mengikuti pergeseran (+0.5s)
     const buttonTimer = setTimeout(() => {
       setButtonsVisible(true)
       setTimeout(() => setInitialEntered(true), 1200)
-    }, 2000)
+    }, 2800)
 
     return () => {
       clearTimeout(shiftTimer)
@@ -145,6 +160,13 @@ function HeroPage() {
             ease: [0.16, 1, 0.3, 1] 
           }}
         >
+          <Menu 
+            activeCategory={activeCategory} 
+            setActiveCategory={handleCategoryChange} 
+            isVisible={hasShifted && !isExpanded && !isPersonalInfoOpen} 
+            delay={initialEntered ? 0.2 : 1.2} 
+          />
+
           <div style={{ position: 'relative', overflow: 'hidden' }}>
             <AnimatePresence mode="popLayout" custom={direction} initial={false}>
               <motion.div
@@ -257,7 +279,6 @@ function HeroPage() {
               </motion.div>
             </motion.button>
           </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ 
@@ -321,7 +342,6 @@ function HeroPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
-
               <motion.div
                 animate={{ 
                   rotate: isPersonalInfoOpen ? -360 : (isSocialsOpen ? -90 : 0),
@@ -343,7 +363,6 @@ function HeroPage() {
                     <polyline points="15 18 9 12 15 6" />
                   </svg>
                 </motion.div>
-
                 {/* Close Icon (X) */}
                 <motion.div
                   initial={false}
@@ -359,7 +378,6 @@ function HeroPage() {
                     <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 </motion.div>
-
                 {/* Chat Icon & External Link Icon (wrapper) */}
                 <motion.div
                   initial={false}
@@ -405,12 +423,13 @@ function HeroPage() {
               </motion.div>
             </motion.button>
           </motion.div>
-
           <SocialButtons isOpen={isSocialsOpen || isPersonalInfoOpen} />
         </motion.div>
       </motion.div>
 
       <ProjectCarousel 
+        category={displayedCategory}
+        isCategoryTransitioning={isCategoryTransitioning}
         expandedProject={expandedProject} 
         isPersonalInfoOpen={isPersonalInfoOpen}
         isProjectInfoOpen={isProjectInfoOpen}
