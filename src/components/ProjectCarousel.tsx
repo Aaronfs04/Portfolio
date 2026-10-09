@@ -18,7 +18,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 2,
-    title: 'Deep Learning',
+    title: 'Draw it',
     subtitle: 'Class Project',
     bg: '/assets/DeepLearning/Background.png',
     video: '/assets/DeepLearning/DeepLearning.mp4',
@@ -137,7 +137,7 @@ export function ProjectCarousel({
         }}
         initial={{ y: '-100vh', rotateX: -80, scale: 0.9, opacity: 0 }}
         animate={{ y: 0, rotateX: 0, scale: 1, opacity: 1 }}
-        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 5.0 }}
+        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 2.2 }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -254,7 +254,7 @@ export function ProjectCarousel({
           x: (expandedProject || isPersonalInfoOpen) ? 40 : 0 
         }}
         transition={{ 
-          delay: (expandedProject || isPersonalInfoOpen) ? 0 : (expandedProject === null ? 0.2 : 5.75), 
+          delay: (expandedProject || isPersonalInfoOpen) ? 0 : (expandedProject === null ? 0.2 : 2.8), 
           duration: 0.8,
           ease: [0.16, 1, 0.3, 1]
         }}

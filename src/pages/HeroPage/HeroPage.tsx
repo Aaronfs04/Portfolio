@@ -64,16 +64,16 @@ function HeroPage() {
     }
     window.addEventListener('mousemove', handleMouseMove)
 
-    // Kata-kata scramble selesai di detik ~2.5s, lalu berhenti sejenak agar terbaca, baru bergeser santai di 3.2s
+    // Kata-kata scramble selesai di detik ~1.5s, teks bergeser di 1.7s
     const shiftTimer = setTimeout(() => {
       setHasShifted(true)
-    }, 3200)
+    }, 1700)
 
-    // Tombol muncul bertahap tepat saat tulisan berhenti bergeser (~4.25s)
+    // Tombol muncul segera setelah teks mulai bergeser (2.0s)
     const buttonTimer = setTimeout(() => {
       setButtonsVisible(true)
       setTimeout(() => setInitialEntered(true), 1200)
-    }, 4250)
+    }, 2000)
 
     return () => {
       clearTimeout(shiftTimer)
@@ -86,7 +86,7 @@ function HeroPage() {
   const isExpanded = expandedProject !== null
   const direction = isExpanded ? 1 : -1
   const titleText = activeProj ? activeProj.title : "Aaron Faustine"
-  const subtitleText = activeProj ? (activeProj.subtitle || "freelance experience") : "Software Engineer \u00A0•\u00A0 UI/UX Designer \u00A0•\u00A0 AI Enthusiast"
+  const subtitleText = activeProj ? (activeProj.subtitle || "Freelance Experience") : "Software Engineer \u00A0•\u00A0 UI/UX Designer \u00A0•\u00A0 AI Enthusiast"
   const isExpandedSubtitle = isExpanded
 
   return (
@@ -157,7 +157,7 @@ function HeroPage() {
                 transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               >
                 <h1 className="hero-title">
-                  {hasOpenedProject.current ? titleText : <ScrambleText text={titleText} delay={150} duration={2300} />}
+                  {hasOpenedProject.current ? titleText : <ScrambleText text={titleText} delay={150} duration={1400} />}
                 </h1>
               </motion.div>
             </AnimatePresence>
@@ -180,7 +180,7 @@ function HeroPage() {
                 transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               >
                 <h2 className={`hero-subtitle ${isExpandedSubtitle ? 'expanded' : ''}`}>
-                  {hasOpenedProject.current ? subtitleText : <ScrambleText text={subtitleText} delay={300} duration={2200} />}
+                  {hasOpenedProject.current ? subtitleText : <ScrambleText text={subtitleText} delay={300} duration={1300} />}
                 </h2>
               </motion.div>
             </AnimatePresence>
