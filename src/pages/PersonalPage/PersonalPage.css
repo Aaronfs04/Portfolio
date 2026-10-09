@@ -313,8 +313,8 @@
   }
 
   .pi-mobile-photo .pi-photo-card {
-    width: clamp(160px, 50vw, 240px);
-    border-radius: 16px;
+    width: clamp(220px, 65vw, 320px);
+    border-radius: 20px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   }
 
@@ -330,6 +330,6 @@
   }
   
   .pi-top-spacer {
-    height: clamp(170px, 24vh, 210px);
+    height: clamp(350px, 55vh, 450px);
   }
 }
