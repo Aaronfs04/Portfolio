@@ -251,15 +251,22 @@ export function PersonalPage({ isOpen, onScroll }: PersonalPageProps) {
           {/* Bottom progressive blur & fade mask overlay */}
           <motion.div
             className="pi-bottom-blur-mask"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ 
-              duration: 0.9, 
+              duration: 0.6, 
               ease: [0.22, 1, 0.36, 1],
-              delay: isInitialMount.current ? 2.4 : 0 
+              delay: isInitialMount.current ? 1.8 : 0 
             }}
-          />
+          >
+            <div className="pi-blur-slice pi-blur-slice-1" />
+            <div className="pi-blur-slice pi-blur-slice-2" />
+            <div className="pi-blur-slice pi-blur-slice-3" />
+            <div className="pi-blur-slice pi-blur-slice-4" />
+            <div className="pi-blur-slice pi-blur-slice-5" />
+            <div className="pi-blur-gradient" />
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
