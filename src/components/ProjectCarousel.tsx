@@ -10,7 +10,7 @@ export const PROJECTS: Project[] = [
     bg: '/assets/Linear/backgorundLinear.webp',
     video: '/assets/Linear/VideoLinear.mp4',
     tag: 'Information',
-    description: "A business portfolio website for Linear Studio, a multidisciplinary studio working across architecture, interior design, and graphic design. The site serves as the studio’s digital presence, showcasing its work and identity through an artistic, original, and intentionally non-templated experience.",
+    description: "A business portfolio website for Linear Studio, a multidisciplinary studio spanning architecture, interior, and graphic design.",
     role: "Frontend Developer, UI/UX Designer",
     status: "Completed",
     tech: "Next.js, React, TypeScript, GSAP, CSS Modules, ImageKit, Cloudflare Pages, GitHub Actions",
@@ -28,6 +28,19 @@ export const PROJECTS: Project[] = [
     status: "On progress",
     tech: "Python, TensorFlow, PyTorch",
     link: import.meta.env.VITE_PROJECT_DEEP_LEARNING_URL || 'https://draw-it-right.vercel.app/',
+  },
+  {
+    id: 3,
+    title: 'Skinmate',
+    subtitle: 'Class Project',
+    bg: '#847E61', // Hijau lumut (Moss Green)
+    video: '/assets/skinmate/Skinmate_Video.mp4',
+    tag: 'Information',
+    description: 'A software application leveraging computer vision and deep learning models for facial image analysis to automatically detect and classify acne and skin conditions.',
+    role: "Frontend Developer, Logo Designer",
+    status: "Completed (Database Disconected)",
+    tech: "Typescript, Vite, CSS, React",
+    link: import.meta.env.VITE_PROJECT_SKINMATE_URL || 'https://skinmateai.vercel.app/',
   },
 ];
 
@@ -130,9 +143,9 @@ export function ProjectCarousel({
                     : category === 'publication' ? PUBLICATION_DATA
                     : PROJECTS;
 
-  // Jika hanya ada 2 project, kita gandakan menjadi 4 di virtual render 
+  // Jika jumlah project kurang dari atau sama dengan 3, kita gandakan di virtual render 
   // agar animasi melingkar (atas & bawah) memiliki elemen DOM yang cukup untuk bertransisi mulus
-  const renderedProjects = currentData.length === 2 
+  const renderedProjects = currentData.length <= 3
     ? [...currentData.map(p => ({...p, renderId: p.id + '_1'})), ...currentData.map(p => ({...p, renderId: p.id + '_2'}))]
     : currentData.map(p => ({...p, renderId: p.id.toString()}));
 
@@ -153,8 +166,34 @@ export function ProjectCarousel({
       }
     };
 
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isScrolling.current || expandedProject !== null || isPersonalInfoOpen) return;
+      const touchEndY = e.touches[0].clientY;
+      const diffY = touchStartY - touchEndY;
+      
+      if (diffY > 40) { // Swipe up -> next
+        isScrolling.current = true;
+        setActiveIndex((prev) => (prev + 1) % renderedProjects.length);
+        setTimeout(() => (isScrolling.current = false), 1000);
+      } else if (diffY < -40) { // Swipe down -> prev
+        isScrolling.current = true;
+        setActiveIndex((prev) => (prev === 0 ? renderedProjects.length - 1 : prev - 1));
+        setTimeout(() => (isScrolling.current = false), 1000);
+      }
+    };
+
     window.addEventListener('wheel', handleWheel);
-    return () => window.removeEventListener('wheel', handleWheel);
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchmove', handleTouchMove);
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
   }, [activeIndex, expandedProject, isPersonalInfoOpen, renderedProjects.length]);
 
   // Fungsi untuk mendapatkan perbedaan indeks secara melingkar (circular)
@@ -189,7 +228,7 @@ export function ProjectCarousel({
 
             // Tentukan posisi 3D berdasarkan kedudukannya relatif terhadap activeIndex
             // Menggunakan rumus silinder 3D untuk tumpukan dan animasi yang akurat
-            const radius = windowWidth < 768 ? 250 : (windowWidth < 1024 ? 320 : (windowWidth < 1440 ? 360 : 420));
+            const radius = windowWidth < 768 ? 250 : (windowWidth < 1024 ? 320 : (windowWidth < 1440 ? 360 : (windowWidth < 1600 ? 420 : 540)));
             const anglePerCard = 75; // Sudut per kartu dalam derajat
             const angle = diff * anglePerCard;
             const angleRad = angle * (Math.PI / 180);
@@ -204,7 +243,7 @@ export function ProjectCarousel({
             const isAnyExpanded = expandedProject !== null;
 
             // Opacity: hilangkan kartu yang terlalu jauh di belakang atau saat yang lain di-expand atau saat personal info terbuka
-            let opacity = Math.abs(diff) >= 2 ? 0 : (Math.abs(diff) === 1 ? 0.6 : 1);
+            let opacity = Math.abs(diff) >= 2 ? 0 : (Math.abs(diff) === 1 ? 0.75 : 1);
             if (isAnyExpanded && !isExpanded) opacity = 0;
             if (isPersonalInfoOpen) opacity = 0;
             
@@ -212,11 +251,18 @@ export function ProjectCarousel({
             const zIndex = isExpanded ? 50 : (10 - Math.abs(diff));
 
             // Jika expanded atau personal info open, timpa nilai transformasi
-            let animX: number | string = isExpanded ? '2vw' : 0;
+            let animX: number | string = 0;
+            if (isExpanded) {
+              if (windowWidth <= 1024) animX = '-4vw';
+              else if (windowWidth <= 1440) animX = '0vw';
+              else animX = '2vw';
+            }
             let animY: number | string = isExpanded ? 0 : y;
             const animZ = isExpanded ? 150 : z;
             const animRotateX = isExpanded ? 0 : rotateX;
-            const animScale = isExpanded ? 1.75 : (isActive ? 1 : 0.95);
+            const animScale = isExpanded 
+              ? (windowWidth <= 1024 ? 1.55 : (windowWidth <= 1366 ? 1.6 : 1.75)) 
+              : (isActive ? 1 : 0.95);
 
             if (isPersonalInfoOpen || isCategoryTransitioning) {
               if (isActive) {
@@ -320,8 +366,21 @@ export function ProjectCarousel({
                 if (isDotActive) return; // Already active
                 
                 isScrolling.current = true;
-                // Since there are only 2 projects, if it's not active, it's just the next one
-                setActiveIndex((prev) => (prev + 1) % renderedProjects.length);
+                
+                // Calculate shortest path to the clicked dot
+                setActiveIndex((prev) => {
+                  const currentMod = prev % currentData.length;
+                  let diff = i - currentMod;
+                  // If wrapping around is shorter, adjust diff
+                  if (diff > currentData.length / 2) diff -= currentData.length;
+                  if (diff < -currentData.length / 2) diff += currentData.length;
+                  
+                  // Add diff to current index and wrap cleanly
+                  let next = (prev + diff) % renderedProjects.length;
+                  if (next < 0) next += renderedProjects.length;
+                  return next;
+                });
+                
                 setTimeout(() => (isScrolling.current = false), 1000);
               }}
               style={{ cursor: 'pointer' }}

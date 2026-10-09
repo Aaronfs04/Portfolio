@@ -45,7 +45,7 @@
 /* Base typography for personal text */
 .pi-text {
   max-width: clamp(520px, 42vw, 680px);
-  font-size: clamp(1.2rem, 1.05rem + 0.65vw, 1.65rem);
+  font-size: clamp(1.2rem, 0.8rem + 0.8vw, 1.8rem);
   line-height: 1.42;
   color: #71717a;
   letter-spacing: -0.015em;
@@ -69,7 +69,7 @@
 }
 
 .pi-section-title {
-  font-size: clamp(0.85rem, 0.9vw, 1rem);
+  font-size: clamp(0.85rem, 0.5rem + 0.4vw, 1.15rem);
   font-weight: 500;
   color: #111111;
   letter-spacing: -0.01em;
@@ -83,7 +83,7 @@
 }
 
 .pi-highlight-item {
-  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
+  font-size: clamp(1.25rem, 0.8rem + 0.8vw, 1.9rem);
   line-height: 1.3;
   color: #111111;
   font-weight: 500;
@@ -101,7 +101,7 @@
 .pi-hl-tag {
   color: #9ca3af;
   font-weight: 400;
-  font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.25rem);
+  font-size: clamp(0.95rem, 0.6rem + 0.4vw, 1.35rem);
 }
 
 /* Section 4: Location & Availability */
@@ -219,7 +219,7 @@
 
 .pi-photo-card {
   position: relative;
-  width: clamp(260px, 24vw, 420px);
+  width: clamp(260px, 50px + 18vw, 420px);
   aspect-ratio: 1 / 1;
   border-radius: clamp(14px, 1.5vw, 24px);
   overflow: hidden;
@@ -267,6 +267,10 @@
   filter: blur(0px);
 }
 
+.pi-mobile-photo {
+  display: none;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1440px) {
   .pi-scroll-inner {
@@ -300,6 +304,20 @@
   .pi-fixed-stage {
     display: none;
   }
+  
+  .pi-mobile-photo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+    width: 100%;
+  }
+
+  .pi-mobile-photo .pi-photo-card {
+    width: clamp(160px, 50vw, 240px);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
+
   .pi-scroll-inner {
     padding-left: 6vw;
     padding-right: 6vw;
@@ -312,7 +330,6 @@
   }
   
   .pi-top-spacer {
-    height: calc(100vh - clamp(1rem, 2vw, 2.5rem) - 7rem);
-    height: calc(100dvh - clamp(1rem, 2vw, 2.5rem) - 7rem);
+    height: clamp(170px, 24vh, 210px);
   }
 }

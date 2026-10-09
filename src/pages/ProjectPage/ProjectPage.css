@@ -6,7 +6,7 @@
   height: 100%;
   border-radius: clamp(14px, 1.5vw, 24px);
   overflow: hidden;
-  background-color: #e5e7eb;
+  background-color: #d1d5db;
   z-index: 10;
   display: flex;
   align-items: center;
@@ -36,6 +36,7 @@
   height: 100%;
   object-fit: cover;
   z-index: 1;
+  pointer-events: none;
 }
 
 .project-page-video-wrapper {
@@ -46,6 +47,7 @@
   z-index: 2;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none;
 }
 
 .project-page-video {
@@ -53,4 +55,63 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
 }
+
+/* Interactive Viewport-Level Mouse-Following Chat Bubble */
+.project-cursor-follower-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 99999;
+  will-change: transform;
+}
+
+.project-cursor-bubble {
+  transform: translate(-50%, calc(-100% - 14px));
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 11px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  user-select: none;
+  white-space: nowrap;
+  position: relative;
+}
+
+/* Chat bubble tail pointing down towards cursor */
+.project-cursor-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #ffffff;
+}
+
+.chat-bubble-text {
+  font-size: clamp(0.72rem, 0.4rem + 0.4vw, 1.1rem);
+  font-weight: 550;
+  color: #111827;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.chat-bubble-icon {
+  font-size: clamp(0.65rem, 0.35rem + 0.3vw, 1rem);
+  line-height: 1;
+  color: #6b7280;
+  display: inline-block;
+}
+
+
+
+

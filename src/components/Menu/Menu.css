@@ -14,7 +14,7 @@
 }
 
 .category-tab {
-  font-size: clamp(0.7rem, 0.6vw, 0.85rem);
+  font-size: clamp(0.65rem, 0.4rem + 0.35vw, 1.1rem);
   font-weight: 500;
   color: #9ca3af;
   transition: color 0.3s ease, font-weight 0.3s ease;
@@ -39,5 +39,15 @@
 .category-arrow svg {
   width: clamp(20px, 1.5vw, 24px);
   height: clamp(20px, 1.5vw, 24px);
+}
+
+@media (max-width: 768px) {
+  .category-selector {
+    justify-content: center;
+    width: 100%;
+    gap: clamp(0.75rem, 3.5vw, 1.35rem);
+    margin: 0 auto clamp(0.4rem, 1.2vh, 0.8rem) auto;
+    padding-top: clamp(0.2rem, 0.8vh, 0.6rem);
+  }
 }
 

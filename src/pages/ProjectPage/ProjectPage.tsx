@@ -1,4 +1,6 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { ProjectInfoPage } from '../ProjectInfoPage/ProjectInfoPage';
 import './ProjectPage.css';
 
@@ -31,9 +33,39 @@ export function ProjectPage({
   isProjectInfoOpen = false 
 }: ProjectPageProps) {
   const isVisible = isActive || isExpanded;
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Mouse Follower Spring Physics in Viewport Screen Space
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { damping: 28, stiffness: 450 });
+  const springY = useSpring(mouseY, { damping: 28, stiffness: 450 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isVisible) return;
+    mouseX.set(e.clientX);
+    mouseY.set(e.clientY);
+    if (!isHovered) setIsHovered(true);
+  };
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isVisible) return;
+    mouseX.set(e.clientX);
+    mouseY.set(e.clientY);
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
 
   return (
-    <div className="project-page-container">
+    <div 
+      className="project-page-container"
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {/* Overlay abu-abu jika tidak aktif atau coming soon */}
       <div 
         style={{
@@ -42,7 +74,7 @@ export function ProjectPage({
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: '#e5e7eb',
+          backgroundColor: '#d1d5db',
           opacity: isVisible && project.bg ? 0 : 1,
           transition: 'opacity 0.8s ease',
           zIndex: 2,
@@ -58,17 +90,28 @@ export function ProjectPage({
         {!project.bg && project.title}
       </div>
 
-      {/* Background Image */}
+      {/* Background Image / Color */}
       {project.bg && (
-        <motion.img 
-          src={project.bg} 
-          alt={`${project.title} Background`} 
-          className="project-page-bg" 
-          style={{
-            opacity: isVisible ? 1 : 0,
-            transition: 'opacity 0.8s ease',
-          }}
-        />
+        project.bg.startsWith('#') || project.bg.startsWith('rgb') ? (
+          <motion.div
+            className="project-page-bg"
+            style={{
+              backgroundColor: project.bg,
+              opacity: isVisible ? 1 : 0,
+              transition: 'opacity 0.8s ease',
+            }}
+          />
+        ) : (
+          <motion.img 
+            src={project.bg} 
+            alt={`${project.title} Background`} 
+            className="project-page-bg" 
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transition: 'opacity 0.8s ease',
+            }}
+          />
+        )
       )}
       
       {/* Video Wrapper - Selalu hidup di DOM selama aktif agar tidak reload / patah decoder */}
@@ -91,6 +134,40 @@ export function ProjectPage({
             />
           )}
         </motion.div>
+      )}
+
+      {/* Interactive Viewport-Level Cursor Follower Chat Bubble */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isVisible && isHovered && (
+            <motion.div
+              className="project-cursor-follower-wrapper"
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                x: springX,
+                y: springY,
+                pointerEvents: 'none',
+                zIndex: 99999,
+              }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="project-cursor-bubble">
+                <span className="chat-bubble-text">
+                  {isProjectInfoOpen ? 'Click to close' : (isExpanded ? 'Click for info' : 'Click to view')}
+                </span>
+                <span className="chat-bubble-icon">
+                  {isProjectInfoOpen ? '✕' : '✦'}
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
 
       {/* Judul di dalam kartu, hilang saat expanded */}

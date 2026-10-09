@@ -169,6 +169,34 @@ export function PersonalPage({ isOpen, onScroll }: PersonalPageProps) {
               {/* Spacer initial agar paragraf pertama mendarat di bawah layar & terkena blur */}
               <div className="pi-top-spacer" />
 
+              {/* Mobile-only Photo Card placed right before the intro text */}
+              <div className="pi-mobile-photo">
+                <motion.div
+                  className="pi-photo-card"
+                  initial={{ opacity: 0, scale: 0.92, y: 30 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: 30 }}
+                  transition={{ 
+                    duration: 0.9, 
+                    ease: [0.22, 1, 0.36, 1],
+                    delay: isInitialMount.current ? 2.6 : 0
+                  }}
+                >
+                  <img
+                    src={PHOTO_BLUR_PLACEHOLDER}
+                    alt="Aaron Faustine Placeholder"
+                    className={`pi-photo-img pi-photo-blur ${isPhotoLoaded ? 'pi-photo-blur-hidden' : ''}`}
+                    aria-hidden="true"
+                  />
+                  <img
+                    src="/assets/Personal/FotoFormal2.png"
+                    alt="Aaron Faustine"
+                    className={`pi-photo-img pi-photo-full ${isPhotoLoaded ? 'pi-loaded' : 'pi-loading'}`}
+                    onLoad={() => setIsPhotoLoaded(true)}
+                  />
+                </motion.div>
+              </div>
+
               {/* Section 1: Intro Paragraf Utama */}
               <motion.p
                 className="pi-text pi-intro-text"
