@@ -22,7 +22,7 @@ export function SocialButtons({ isOpen }: SocialButtonsProps) {
             aria-label="Email"
             initial={{ opacity: 0, x: 150, scale: 0.5 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 150, scale: 0.5, transition: { duration: 0.4 } }}
+            exit={{ opacity: 0, x: -30, scale: 0.7, transition: { duration: 0.35, ease: [0.25, 1, 0.5, 1] } }}
             transition={{
               type: 'spring',
               bounce: 0,
@@ -56,7 +56,7 @@ export function SocialButtons({ isOpen }: SocialButtonsProps) {
             aria-label="WhatsApp"
             initial={{ opacity: 0, x: 150, scale: 0.5 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 150, scale: 0.5, transition: { duration: 0.4 } }}
+            exit={{ opacity: 0, x: -30, scale: 0.7, transition: { duration: 0.35, ease: [0.25, 1, 0.5, 1] } }}
             transition={{
               type: 'spring',
               bounce: 0,
@@ -81,7 +81,7 @@ export function SocialButtons({ isOpen }: SocialButtonsProps) {
             aria-label="LinkedIn"
             initial={{ opacity: 0, x: 150, scale: 0.5 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 150, scale: 0.5, transition: { duration: 0.4 } }}
+            exit={{ opacity: 0, x: -30, scale: 0.7, transition: { duration: 0.35, ease: [0.25, 1, 0.5, 1] } }}
             transition={{
               type: 'spring',
               bounce: 0,
@@ -112,7 +112,7 @@ export function SocialButtons({ isOpen }: SocialButtonsProps) {
             aria-label="GitHub"
             initial={{ opacity: 0, x: 150, scale: 0.5 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 150, scale: 0.5, transition: { duration: 0.4 } }}
+            exit={{ opacity: 0, x: -30, scale: 0.7, transition: { duration: 0.35, ease: [0.25, 1, 0.5, 1] } }}
             transition={{
               type: 'spring',
               bounce: 0,

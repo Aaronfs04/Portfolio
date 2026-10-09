@@ -268,7 +268,7 @@
 }
 
 .pi-mobile-photo {
-  display: none;
+  display: none !important;
 }
 
 /* Responsive adjustments */
@@ -300,15 +300,21 @@
   }
 }
 
-@media (max-width: 768px) {
+/* HP dan Tab Vertikal (Portrait <= 1024px ATAU layar <= 768px) */
+@media (max-width: 768px), ((max-width: 1024px) and (orientation: portrait)) {
   .pi-fixed-stage {
-    display: none;
+    display: none !important;
   }
   
   .pi-mobile-photo {
-    display: flex;
+    display: flex !important;
+    min-height: 100vh;
+    min-height: 100dvh;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    margin-bottom: 2.5rem;
+    margin: 0;
+    padding-bottom: 10vh;
     width: 100%;
   }
 

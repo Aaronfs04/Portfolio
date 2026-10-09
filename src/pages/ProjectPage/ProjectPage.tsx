@@ -181,10 +181,10 @@ export function ProjectPage({
         {project.title}
       </div>
 
-      {/* Project Info Overlay Page (terpisah) */}
+      {/* Project Info Overlay Page (hanya untuk desktop) */}
       <ProjectInfoPage 
         project={project} 
-        isOpen={isExpanded && isProjectInfoOpen} 
+        isOpen={typeof window !== 'undefined' && window.innerWidth > 768 && isExpanded && isProjectInfoOpen} 
       />
     </div>
   );

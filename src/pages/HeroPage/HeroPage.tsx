@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 import { ScrambleText } from '../../components/ScrambleText'
-import { ProjectCarousel, PROJECTS } from '../../components/ProjectCarousel'
+import { ProjectCarousel, PROJECTS, ACHIEVEMENT_DATA, PUBLICATION_DATA } from '../../components/ProjectCarousel'
 import { SocialButtons } from '../../components/SocialButtons'
 import { PersonalPage } from '../PersonalPage/PersonalPage'
 import { Menu, Category } from '../../components/Menu/Menu'
@@ -32,6 +32,7 @@ function HeroPage() {
   const [isSocialsOpen, setIsSocialsOpen] = useState(false)
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  const [isMobileButtonExited, setIsMobileButtonExited] = useState(false)
   
   const [activeCategory, setActiveCategory] = useState<Category>('profile')
   const [displayedCategory, setDisplayedCategory] = useState<Category>('profile')
@@ -63,14 +64,35 @@ function HeroPage() {
     setPersonalScrollY(y)
   }, [])
 
+  const socialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const triggerSocialAutoOpen = useCallback((delay = 750) => {
+    if (socialTimerRef.current) clearTimeout(socialTimerRef.current)
+    setIsSocialsOpen(false)
+    socialTimerRef.current = setTimeout(() => {
+      setIsSocialsOpen(true)
+    }, delay)
+  }, [])
+
   const handleCategoryChange = (newCategory: Category) => {
     if (newCategory === displayedCategory || isCategoryTransitioning) return
     setActiveCategory(newCategory)
     setIsCategoryTransitioning(true)
+    setIsMobileButtonExited(false)
+    // Tetap terbuka untuk tiap perpindahan page
+    setIsSocialsOpen(true)
     setTimeout(() => {
       setDisplayedCategory(newCategory)
       setIsCategoryTransitioning(false)
-    }, 400)
+    }, 700)
+  }
+
+  const handleCloseProject = () => {
+    setExpandedProject(null)
+    setIsProjectInfoOpen(false)
+    setIsMobileButtonExited(false)
+    // Di mobile setelah kembali dari project detail, muncul 1 tombol dulu lalu terbuka otomatis
+    triggerSocialAutoOpen(isMobile ? 700 : 550)
   }
 
   // --- Magnetic Y Cursor untuk tombol Minimize ---
@@ -111,12 +133,51 @@ function HeroPage() {
       clearTimeout(shiftTimer)
       clearTimeout(buttonTimer)
       clearTimeout(autoOpenTimer)
+      if (socialTimerRef.current) clearTimeout(socialTimerRef.current)
       window.removeEventListener('mousemove', handleMouseMove)
     }
   }, [])
 
-  const activeProj = PROJECTS.find(p => p.id === expandedProject)
   const isExpanded = expandedProject !== null
+  const currentCategoryData = displayedCategory === 'achievement' ? ACHIEVEMENT_DATA
+                            : displayedCategory === 'publication' ? PUBLICATION_DATA
+                            : PROJECTS;
+  const activeProj = currentCategoryData.find(p => p.id === expandedProject) || PROJECTS.find(p => p.id === expandedProject);
+
+  const [shrinkBtnLeft, setShrinkBtnLeft] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!isExpanded || isMobile) return
+
+    let animId: number
+    const startTime = performance.now()
+
+    const updatePosition = () => {
+      const card = document.getElementById('expanded-project-card') ||
+                   document.querySelector('.project-card')
+      if (card) {
+        const rect = card.getBoundingClientRect()
+        const btn = document.querySelector('.shrink-btn')
+        const btnWidth = btn ? btn.getBoundingClientRect().width : Math.max(38, Math.min(62, 10 + window.innerWidth * 0.025))
+        const gap = Math.max(14, Math.min(20, window.innerWidth * 0.012)) // Pastikan padding samping rapi 14px - 20px
+        setShrinkBtnLeft(rect.left - btnWidth - gap)
+      }
+
+      if (performance.now() - startTime < 1200) {
+        animId = requestAnimationFrame(updatePosition)
+      }
+    }
+
+    updatePosition()
+    animId = requestAnimationFrame(updatePosition)
+
+    window.addEventListener('resize', updatePosition)
+
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [isExpanded, isMobile, windowWidth])
   const direction = isExpanded ? 1 : -1
   const titleText = activeProj ? activeProj.title : "Aaron Faustine"
   const subtitleText = activeProj ? (activeProj.subtitle || "Freelance Experience") : "Software Engineer \u00A0•\u00A0 UI/UX Designer \u00A0•\u00A0 AI Enthusiast"
@@ -124,28 +185,32 @@ function HeroPage() {
 
   const heroButtonsNode = (
     <motion.div 
-      className="hero-buttons"
+      className={`hero-buttons ${isMobile && isExpanded ? 'expanded-mobile' : ''}`}
       style={{ display: 'flex', gap: 'clamp(6px, 0.5vw, 10px)' }}
     >
       <motion.div
         initial={{ opacity: 0, y: 32 }}
         animate={{ 
-          opacity: buttonsVisible ? 1 : 0, 
-          y: !buttonsVisible ? 32 : (isExpanded ? 60 : 0)
+          opacity: !buttonsVisible ? 0 : 1, 
+          y: !buttonsVisible 
+            ? 32 
+            : (isMobile 
+                ? (isMobileButtonExited ? 400 : 0) 
+                : (isExpanded ? 60 : 0))
         }}
         transition={{ 
-          type: "spring", 
-          bounce: 0, 
-          duration: 0.8,
+          duration: 0.7,
+          ease: [0.32, 0, 0.24, 1],
           delay: (!initialEntered && buttonsVisible) ? 0.14 : 0
         }}
-        style={{ pointerEvents: buttonsVisible ? 'auto' : 'none' }}
+        style={{ pointerEvents: (buttonsVisible && !(isMobile && (isExpanded || isMobileButtonExited))) ? 'auto' : 'none' }}
       >
         <motion.button 
           className="icon-btn" 
-          aria-label={isSocialsOpen ? "Close" : (isExpanded ? "Visit Site" : "Chat")}
+          aria-label={isSocialsOpen ? "Close" : (!isMobile && isExpanded ? "Visit Site" : "Chat")}
           onClick={() => {
-            if (isExpanded) {
+            if (socialTimerRef.current) clearTimeout(socialTimerRef.current)
+            if (!isMobile && isExpanded) {
               if (activeProj?.link && activeProj.link !== '#') {
                 window.open(activeProj.link, '_blank', 'noopener,noreferrer')
               }
@@ -157,11 +222,11 @@ function HeroPage() {
             backgroundColor: isSocialsOpen ? '#111' : '#fff',
             color: isSocialsOpen ? '#fff' : '#111',
             borderRadius: isSocialsOpen ? '50%' : '18px',
-            width: (isExpanded && isProjectInfoOpen) ? 'clamp(116px, 9.5vw, 136px)' : 'clamp(46px, 10px + 3vw, 72px)',
-            paddingLeft: (isExpanded && isProjectInfoOpen) ? 'clamp(16px, 1.2vw, 22px)' : 'clamp(0px, 0vw, 0px)',
-            paddingRight: (isExpanded && isProjectInfoOpen) ? 'clamp(16px, 1.2vw, 22px)' : 'clamp(0px, 0vw, 0px)'
+            width: (!isMobile && isExpanded && isProjectInfoOpen) ? 'clamp(116px, 9.5vw, 136px)' : 'clamp(46px, 10px + 3vw, 72px)',
+            paddingLeft: (!isMobile && isExpanded && isProjectInfoOpen) ? 'clamp(16px, 1.2vw, 22px)' : 'clamp(0px, 0vw, 0px)',
+            paddingRight: (!isMobile && isExpanded && isProjectInfoOpen) ? 'clamp(16px, 1.2vw, 22px)' : 'clamp(0px, 0vw, 0px)'
           }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
           style={{ 
             position: 'relative',
             overflow: 'hidden',
@@ -170,7 +235,7 @@ function HeroPage() {
           }}
         >
           <AnimatePresence>
-            {(isExpanded && isProjectInfoOpen) && (
+            {(!isMobile && isExpanded && isProjectInfoOpen) && (
               <motion.div
                 key="see-live"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -191,10 +256,10 @@ function HeroPage() {
           <motion.div
             animate={{ 
               rotate: isSocialsOpen ? -90 : 0,
-              opacity: (isExpanded && isProjectInfoOpen) ? 0 : 1
+              opacity: (!isMobile && isExpanded && isProjectInfoOpen) ? 0 : 1
             }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            style={{ width: 'clamp(46px, 10px + 3vw, 72px)', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: (isExpanded && isProjectInfoOpen) ? 'none' : 'auto' }}
+            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+            style={{ width: 'clamp(46px, 10px + 3vw, 72px)', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: (!isMobile && isExpanded && isProjectInfoOpen) ? 'none' : 'auto' }}
           >
             {/* Close Icon (X) */}
             <motion.div
@@ -203,7 +268,7 @@ function HeroPage() {
                 opacity: isSocialsOpen ? 1 : 0,
                 scale: isSocialsOpen ? 1 : 0.5
               }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
+              transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
               style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <svg style={{ width: '36%', height: '36%' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -217,11 +282,11 @@ function HeroPage() {
               animate={{ 
                 opacity: isSocialsOpen ? 0 : 1
               }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
+              transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
               style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}
             >
               <motion.div
-                animate={{ y: isExpanded ? -60 : 0 }}
+                animate={{ y: (!isMobile && isExpanded) ? -60 : 0 }}
                 transition={{ 
                   delay: !hasOpenedProject.current ? 0 : 0.1,
                   duration: 1.15, 
@@ -230,7 +295,7 @@ function HeroPage() {
                 style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}
               >
                 <motion.div
-                  animate={{ opacity: isExpanded ? 0 : 1 }}
+                  animate={{ opacity: (!isMobile && isExpanded) ? 0 : 1 }}
                   transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1], delay: !hasOpenedProject.current ? 0 : 0.1 }}
                   style={{ position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
@@ -241,7 +306,7 @@ function HeroPage() {
                   </svg>
                 </motion.div>
                 <motion.div
-                  animate={{ opacity: isExpanded ? 1 : 0 }}
+                  animate={{ opacity: (!isMobile && isExpanded) ? 1 : 0 }}
                   transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1], delay: !hasOpenedProject.current ? 0 : 0.1 }}
                   style={{ position: 'absolute', top: '60px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
@@ -265,20 +330,18 @@ function HeroPage() {
       <AnimatePresence>
         {isExpanded && (
           <motion.button
-            className="icon-btn shrink-btn"
-            onClick={() => {
-              setExpandedProject(null)
-              setIsProjectInfoOpen(false)
-            }}
+            className={`icon-btn shrink-btn ${isMobile ? 'mobile-shrink' : ''}`}
+            onClick={handleCloseProject}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             style={{
-              position: 'absolute',
-              top: 0,
-              y: springY,
-              zIndex: 50,
+              position: 'fixed',
+              top: isMobile ? 'auto' : 0,
+              left: (!isMobile && shrinkBtnLeft !== null) ? shrinkBtnLeft : undefined,
+              y: isMobile ? 0 : springY,
+              zIndex: 99999,
             }}
             aria-label="Minimize"
           >
@@ -287,6 +350,33 @@ function HeroPage() {
               <polyline points="20 10 14 10 14 4" />
               <line x1="14" y1="10" x2="21" y2="3" />
               <line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Tombol See Live khusus Mobile */}
+      <AnimatePresence>
+        {isMobile && isExpanded && activeProj?.link && activeProj.link !== '#' && (
+          <motion.button
+            className="icon-btn mobile-see-live-btn"
+            onClick={() => {
+              if (activeProj?.link && activeProj.link !== '#') {
+                window.open(activeProj.link, '_blank', 'noopener,noreferrer')
+              }
+            }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
+            whileTap={{ scale: 0.96 }}
+            aria-label="See Live"
+          >
+            <span>See Live</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="see-live-icon">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
             </svg>
           </motion.button>
         )}
@@ -311,7 +401,7 @@ function HeroPage() {
             opacity: 1,
             scale: hasShifted ? 1 : 0.6,
             x: hasShifted ? 0 : (isMobile ? 0 : '25vw'),
-            y: isExpanded ? -40 : (hasShifted ? 0 : (isMobile ? '35vh' : 0))
+            y: isExpanded ? (isMobile ? 12 : -40) : (hasShifted ? 0 : (isMobile ? '35vh' : 0))
           }}
           style={{ transformOrigin: isMobile ? "center center" : "left center" }}
           transition={{ 
@@ -319,6 +409,15 @@ function HeroPage() {
             ease: [0.16, 1, 0.3, 1] 
           }}
         >
+          {!isMobile && (
+            <Menu 
+              activeCategory={activeCategory} 
+              setActiveCategory={handleCategoryChange} 
+              isVisible={hasShifted && !isExpanded} 
+              delay={initialEntered ? 0.2 : 1.2} 
+            />
+          )}
+
           <div style={{ position: 'relative', overflow: 'hidden' }}>
             <AnimatePresence mode="popLayout" custom={direction} initial={false}>
               <motion.div
@@ -360,12 +459,14 @@ function HeroPage() {
             </AnimatePresence>
           </motion.div>
 
-          <Menu 
-            activeCategory={activeCategory} 
-            setActiveCategory={handleCategoryChange} 
-            isVisible={hasShifted && !isExpanded} 
-            delay={initialEntered ? 0.2 : 1.2} 
-          />
+          {isMobile && (
+            <Menu 
+              activeCategory={activeCategory} 
+              setActiveCategory={handleCategoryChange} 
+              isVisible={hasShifted && !isExpanded} 
+              delay={initialEntered ? 0.2 : 1.2} 
+            />
+          )}
         </motion.div>
 
         {/* HERO BUTTONS (Desktop: rendered inside hero-content) */}
@@ -382,8 +483,22 @@ function HeroPage() {
         isPersonalInfoOpen={isDisplayedPersonalInfo}
         isProjectInfoOpen={isProjectInfoOpen}
         onProjectClick={(id) => {
-          setExpandedProject(id)
-          setIsSocialsOpen(false)
+          if (socialTimerRef.current) clearTimeout(socialTimerRef.current)
+          if (isMobile) {
+            // Step 1: Menutup dulu untuk social buttonnya
+            setIsSocialsOpen(false)
+            // Step 2: Baru tombol meluncur turun ke bawah dengan smooth (setelah selesai menutup)
+            setTimeout(() => {
+              setIsMobileButtonExited(true)
+            }, 380)
+            // Step 3: Detail project membesar ke atas
+            setTimeout(() => {
+              setExpandedProject(id)
+            }, 550)
+          } else {
+            setExpandedProject(id)
+            setIsSocialsOpen(false)
+          }
         }} 
         onToggleProjectInfo={() => {
           setIsProjectInfoOpen((prev) => !prev)

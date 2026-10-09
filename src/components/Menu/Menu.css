@@ -46,8 +46,8 @@
     justify-content: center;
     width: 100%;
     gap: clamp(0.75rem, 3.5vw, 1.35rem);
-    margin: clamp(2.5rem, 6vh, 4rem) auto clamp(0.4rem, 1.2vh, 0.8rem) auto;
-    padding-top: clamp(0.2rem, 0.8vh, 0.6rem);
+    margin: 0 auto clamp(0.4rem, 1.2vh, 0.8rem) auto;
+    padding-top: 0;
   }
 }
 

@@ -146,7 +146,7 @@ export function PersonalPage({ isOpen, onScroll }: PersonalPageProps) {
               {/* High-res personal photo with smooth fade-in & unblur transition */}
               <img
                 ref={photoRef}
-                src="/assets/Personal/FotoFormal2.png"
+                src={`${import.meta.env.BASE_URL}assets/Personal/FotoFormal2.png`}
                 alt="Aaron Faustine"
                 className={`pi-photo-img pi-photo-full ${isPhotoLoaded ? 'pi-loaded' : 'pi-loading'}`}
                 onLoad={() => setIsPhotoLoaded(true)}
@@ -218,8 +218,8 @@ export function PersonalPage({ isOpen, onScroll }: PersonalPageProps) {
                 Developed by <span className="pi-highlight-dark">Aaron Faustine</span>.
               </p>
 
-              {/* Mobile-only Photo Card placed at the bottom */}
-              <div className="pi-mobile-photo" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: 0, paddingBottom: '10vh' }}>
+              {/* Mobile and portrait tablet Photo Card placed at the bottom */}
+              <div className="pi-mobile-photo">
                 <motion.div
                   className="pi-photo-card"
                   initial={{ opacity: 0, scale: 0.92, y: 30 }}
@@ -238,7 +238,7 @@ export function PersonalPage({ isOpen, onScroll }: PersonalPageProps) {
                     aria-hidden="true"
                   />
                   <img
-                    src="/assets/Personal/FotoFormal2.png"
+                    src={`${import.meta.env.BASE_URL}assets/Personal/FotoFormal2.png`}
                     alt="Aaron Faustine"
                     className={`pi-photo-img pi-photo-full ${isPhotoLoaded ? 'pi-loaded' : 'pi-loading'}`}
                     onLoad={() => setIsPhotoLoaded(true)}

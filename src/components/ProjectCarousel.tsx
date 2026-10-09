@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ProjectPage, Project } from '../pages/ProjectPage/ProjectPage';
 
 export const PROJECTS: Project[] = [
@@ -97,9 +97,13 @@ export function ProjectCarousel({
   const isScrolling = useRef(false);
 
   // Responsiveness state
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [windowHeight, setWindowHeight] = useState(typeof window !== 'undefined' ? window.innerHeight : 800);
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -148,6 +152,12 @@ export function ProjectCarousel({
   const renderedProjects = currentData.length <= 3
     ? [...currentData.map(p => ({...p, renderId: p.id + '_1'})), ...currentData.map(p => ({...p, renderId: p.id + '_2'}))]
     : currentData.map(p => ({...p, renderId: p.id.toString()}));
+
+  const isMobile = windowWidth <= 768;
+  const isAnyExpanded = expandedProject !== null;
+  const activeExpandedProj = isAnyExpanded
+    ? (currentData.find(p => p.id === expandedProject) || PROJECTS.find(p => p.id === expandedProject))
+    : null;
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -208,11 +218,10 @@ export function ProjectCarousel({
     <>
       {/* Bagian Kanan: Project Carousel */}
       <motion.div
-        className="hero-projects"
+        className={`hero-projects ${isMobile && isAnyExpanded ? 'expanded-mobile' : ''}`}
         style={{ 
           perspective: 1200,
-          /* Geser ke kiri sedikit */
-          marginLeft: '-4vw',
+          marginLeft: isMobile ? 0 : '-4vw',
           pointerEvents: isPersonalInfoOpen ? 'none' : 'auto'
         }}
         initial={{ y: '-100vh', rotateX: -80, scale: 0.9, opacity: 0 }}
@@ -221,14 +230,14 @@ export function ProjectCarousel({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        <div style={{ position: 'relative', width: 'clamp(260px, 24vw, 420px)', aspectRatio: '1 / 1', transformStyle: 'preserve-3d' }}>
+        <div style={{ position: 'relative', width: windowWidth <= 768 ? 'clamp(240px, 75vw, 350px)' : 'clamp(260px, 24vw, 420px)', aspectRatio: '1 / 1', transformStyle: 'preserve-3d' }}>
           {renderedProjects.map((proj, i) => {
             const diff = getWrappedDiff(i, activeIndex, renderedProjects.length);
             const isActive = diff === 0;
 
             // Tentukan posisi 3D berdasarkan kedudukannya relatif terhadap activeIndex
             // Menggunakan rumus silinder 3D untuk tumpukan dan animasi yang akurat
-            const radius = windowWidth < 768 ? 250 : (windowWidth < 1024 ? 320 : (windowWidth < 1440 ? 360 : (windowWidth < 1600 ? 420 : 540)));
+            const radius = windowWidth < 768 ? 350 : (windowWidth < 1024 ? 320 : (windowWidth < 1440 ? 360 : (windowWidth < 1600 ? 420 : 540)));
             const anglePerCard = 75; // Sudut per kartu dalam derajat
             const angle = diff * anglePerCard;
             const angleRad = angle * (Math.PI / 180);
@@ -253,24 +262,45 @@ export function ProjectCarousel({
             // Jika expanded atau personal info open, timpa nilai transformasi
             let animX: number | string = 0;
             if (isExpanded) {
-              if (windowWidth <= 1024) animX = '-4vw';
+              if (isMobile) animX = 0;
+              else if (windowWidth <= 1024) animX = '-4vw';
               else if (windowWidth <= 1440) animX = '0vw';
               else animX = '2vw';
             }
             let animY: number | string = isExpanded ? 0 : y;
-            const animZ = isExpanded ? 150 : z;
-            const animRotateX = isExpanded ? 0 : rotateX;
-            const animScale = isExpanded 
-              ? (windowWidth <= 1024 ? 1.55 : (windowWidth <= 1366 ? 1.6 : 1.75)) 
+            let animZ = isExpanded ? (isMobile ? 0 : 150) : z;
+            let animRotateX = isExpanded ? 0 : rotateX;
+            let animScale = isExpanded 
+              ? (isMobile ? 1 : (windowWidth <= 1024 ? 1.55 : (windowWidth <= 1366 ? 1.6 : 1.75))) 
               : (isActive ? 1 : 0.95);
+
+            const isMobileStackCard = isMobile && diff !== 0;
+            const mobileExitDistance = Math.round(Math.max(windowHeight * 0.9, 700));
+
+            // Transisi khusus mobile saat project detail dibuka/ditutup:
+            // 1. Tumpukan atas (diff < 0) langsung geser keluar ke atas tanpa glitch
+            // 2. Tumpukan bawah (diff > 0) langsung geser keluar ke bawah tanpa glitch
+            // 3. Gambar tengah (isActive & isExpanded) naik ke atas dan melebar ke samping secara perlahan (ukuran persis seperti sebelumnya)
+            if (isMobile && isAnyExpanded) {
+              if (isExpanded) {
+                animY = -110; // Naik ke posisi media card atas
+                animScale = 1; // Melebar ke samping via width & height, bukan diperbesar keseluruhan
+                animRotateX = 0;
+                animZ = 0;
+              } else if (diff < 0) {
+                animY = -mobileExitDistance; // Tumpukan atas langsung geser keluar ke atas tanpa glitch
+              } else if (diff > 0) {
+                animY = mobileExitDistance; // Tumpukan bawah langsung geser keluar ke bawah tanpa glitch
+              }
+            }
 
             if (isPersonalInfoOpen || isCategoryTransitioning) {
               if (isActive) {
-                animX = '60vw'; // Keluar bergeser ke kanan
+                animX = isMobile ? '135vw' : '100vw'; // Keluar sepenuhnya dari frame ke kanan
               } else if (diff < 0) {
-                animY = '-70vh'; // Tumpukan atas keluar bergeser ke atas
+                animY = '-100vh'; // Tumpukan atas keluar sepenuhnya ke atas
               } else if (diff > 0) {
-                animY = '70vh'; // Tumpukan bawah keluar bergeser ke bawah
+                animY = '100vh'; // Tumpukan bawah keluar sepenuhnya ke bawah
               }
             }
 
@@ -279,8 +309,8 @@ export function ProjectCarousel({
                 key={proj.renderId}
                 className="project-card-slot"
                 initial={isFirstRender.current ? false : {
-                  x: isActive ? '60vw' : 0,
-                  y: isActive ? 0 : (diff < 0 ? '-70vh' : '70vh'),
+                  x: isActive ? (isMobile ? '135vw' : '100vw') : 0,
+                  y: isActive ? 0 : (diff < 0 ? '-100vh' : '100vh'),
                   z: z,
                   rotateX: rotateX,
                   scale: animScale,
@@ -292,6 +322,9 @@ export function ProjectCarousel({
                   left: 0,
                   width: '100%',
                   height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   transformOrigin: 'center center',
                   pointerEvents: (!isPersonalInfoOpen && !isCategoryTransitioning && (isActive || isExpanded)) ? 'auto' : 'none',
                   cursor: (!isPersonalInfoOpen && !isCategoryTransitioning && (isActive || isExpanded)) ? 'pointer' : 'default',
@@ -299,7 +332,7 @@ export function ProjectCarousel({
                 onClick={() => {
                   if (isPersonalInfoOpen || isCategoryTransitioning) return;
                   if (isExpanded) {
-                    if (onToggleProjectInfo) {
+                    if (!isMobile && onToggleProjectInfo) {
                       onToggleProjectInfo();
                     }
                   } else if (isActive && onProjectClick) {
@@ -316,13 +349,30 @@ export function ProjectCarousel({
                   zIndex: zIndex,
                 }}
                 transition={{
-                  duration: 1.0,
-                  ease: [0.16, 1, 0.3, 1],
+                  duration: isCategoryTransitioning 
+                    ? 0.65 
+                    : (isMobileStackCard ? 1.05 : 0.85),
+                  ease: isCategoryTransitioning 
+                    ? [0.32, 0, 0.24, 1] 
+                    : [0.16, 1, 0.3, 1],
                 }}
               >
                 <motion.div
-                  className="project-card"
+                  className={`project-card ${isMobile && isExpanded ? 'expanded-mobile-card' : ''}`}
+                  id={isExpanded ? "expanded-project-card" : undefined}
+                  animate={{
+                    width: (isMobile && isExpanded) ? 'clamp(280px, 88vw, 390px)' : '100%',
+                    height: (isMobile && isExpanded) ? 'clamp(200px, 34vh, 270px)' : '100%',
+                    borderRadius: (isMobile && isExpanded) ? 'clamp(22px, 5.5vw, 30px)' : 'clamp(24px, 6vw, 36px)',
+                  }}
+                  transition={{
+                    duration: 0.85,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
                   style={{
+                    flexShrink: 0,
+                    maxWidth: 'none',
+                    minWidth: (isMobile && isExpanded) ? 'clamp(280px, 88vw, 390px)' : undefined,
                     x: (isActive && !isExpanded) ? cardX : 0,
                     y: (isActive && !isExpanded) ? cardY : 0,
                   }}
@@ -331,13 +381,73 @@ export function ProjectCarousel({
                     project={proj} 
                     isActive={isActive} 
                     isExpanded={isExpanded} 
-                    isProjectInfoOpen={isProjectInfoOpen}
+                    isProjectInfoOpen={isProjectInfoOpen} 
                     onClose={() => onProjectClick && onProjectClick(proj.id)} 
                   />
                 </motion.div>
               </motion.div>
             );
           })}
+
+          {/* Card 2 di Mobile: Explanation Card di bawah gambar utama */}
+          <AnimatePresence>
+            {isMobile && isAnyExpanded && activeExpandedProj && (
+              <motion.div
+                key="mobile-expanded-info"
+                className="mobile-expanded-info-card"
+                initial={{ opacity: 0, clipPath: 'inset(0% 0% 100% 0% round 24px)', y: -16 }}
+                animate={{ opacity: 1, clipPath: 'inset(0% 0% 0% 0% round 24px)', y: 0 }}
+                exit={{ 
+                  opacity: 0, 
+                  clipPath: 'inset(0% 0% 100% 0% round 24px)', 
+                  y: -16,
+                  transition: { duration: 0.35, ease: [0.25, 1, 0.5, 1], delay: 0 } 
+                }}
+                transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1], delay: 0.52 }}
+                style={{
+                  position: 'absolute',
+                  top: 'calc(50% + clamp(26px, 3.8vh, 42px))',
+                  left: '50%',
+                  x: '-50%',
+                  transformOrigin: 'top center',
+                  zIndex: 60,
+                }}
+              >
+                <div className="mobile-expanded-info-tag">
+                  {activeExpandedProj.tag || 'Information'}
+                </div>
+                <div className="mobile-expanded-info-body">
+                  {activeExpandedProj.description && (
+                    <p className="mobile-expanded-desc">
+                      {activeExpandedProj.description}
+                    </p>
+                  )}
+                  {(activeExpandedProj.role || activeExpandedProj.status || activeExpandedProj.tech) && (
+                    <div className="mobile-expanded-meta">
+                      {activeExpandedProj.role && (
+                        <div className="mobile-meta-row">
+                          <span className="mobile-meta-label">Role:</span>{' '}
+                          <span className="mobile-meta-value">{activeExpandedProj.role}</span>
+                        </div>
+                      )}
+                      {activeExpandedProj.status && (
+                        <div className="mobile-meta-row">
+                          <span className="mobile-meta-label">Status:</span>{' '}
+                          <span className="mobile-meta-value">{activeExpandedProj.status}</span>
+                        </div>
+                      )}
+                      {activeExpandedProj.tech && (
+                        <div className="mobile-meta-row">
+                          <span className="mobile-meta-label">Tools:</span>{' '}
+                          <span className="mobile-meta-value">{activeExpandedProj.tech}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
 
