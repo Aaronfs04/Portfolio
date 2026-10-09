@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import './Menu.css'
 
-export type Category = 'project' | 'achievement' | 'publication'
+export type Category = 'profile' | 'project' | 'achievement' | 'publication'
 
 interface MenuProps {
   activeCategory: Category;
@@ -12,6 +12,7 @@ interface MenuProps {
 
 export function Menu({ activeCategory, setActiveCategory, isVisible, delay = 0 }: MenuProps) {
   const categories: { id: Category; label: string }[] = [
+    { id: 'profile', label: 'Profile' },
     { id: 'project', label: 'Project' },
     { id: 'achievement', label: 'Achievement' },
     { id: 'publication', label: 'Publication' }

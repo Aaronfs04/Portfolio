@@ -27,14 +27,16 @@ function HeroPage() {
   const [hasShifted, setHasShifted] = useState(false)
   const [buttonsVisible, setButtonsVisible] = useState(false)
   const [initialEntered, setInitialEntered] = useState(false)
-  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(false)
   const [personalScrollY, setPersonalScrollY] = useState(0)
   const [isSocialsOpen, setIsSocialsOpen] = useState(false)
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false)
   
-  const [activeCategory, setActiveCategory] = useState<Category>('project')
-  const [displayedCategory, setDisplayedCategory] = useState<Category>('project')
+  const [activeCategory, setActiveCategory] = useState<Category>('profile')
+  const [displayedCategory, setDisplayedCategory] = useState<Category>('profile')
   const [isCategoryTransitioning, setIsCategoryTransitioning] = useState(false)
+
+  const isPersonalInfoOpen = activeCategory === 'profile';
+  const isDisplayedPersonalInfo = displayedCategory === 'profile';
 
   const hasOpenedProject = useRef(false)
   if (expandedProject !== null) {
@@ -90,9 +92,15 @@ function HeroPage() {
       setTimeout(() => setInitialEntered(true), 1200)
     }, 2800)
 
+    // Buka tombol contact secara otomatis setelah semua elemen & aset muncul sempurna (~4.0s)
+    const autoOpenTimer = setTimeout(() => {
+      setIsSocialsOpen(true)
+    }, 4000)
+
     return () => {
       clearTimeout(shiftTimer)
       clearTimeout(buttonTimer)
+      clearTimeout(autoOpenTimer)
       window.removeEventListener('mousemove', handleMouseMove)
     }
   }, [])
@@ -122,7 +130,6 @@ function HeroPage() {
               position: 'absolute',
               top: 0,
               y: springY,
-              // Digeser ke kiri 2vw
               right: '49.6vw',
               zIndex: 50,
             }}
@@ -163,7 +170,7 @@ function HeroPage() {
           <Menu 
             activeCategory={activeCategory} 
             setActiveCategory={handleCategoryChange} 
-            isVisible={hasShifted && !isExpanded && !isPersonalInfoOpen} 
+            isVisible={hasShifted && !isExpanded} 
             delay={initialEntered ? 0.2 : 1.2} 
           />
 
@@ -209,76 +216,11 @@ function HeroPage() {
           </motion.div>
         </motion.div>
 
-        {/* HERO BUTTONS (New Layout) */}
-        
+        {/* HERO BUTTONS (New Layout - Contact Us Only) */}
         <motion.div 
           className="hero-buttons"
           style={{ display: 'flex', gap: 'clamp(6px, 0.5vw, 10px)', position: 'relative' }}
         >
-          {/* PROFILE BUTTON - ALWAYS MOUNTED */}
-          <motion.div
-            initial={false}
-            animate={{ 
-              opacity: (buttonsVisible && !isPersonalInfoOpen) ? 1 : 0, 
-              y: !buttonsVisible ? 32 : (isExpanded ? 60 : 0)
-            }}
-            transition={{ type: "spring", bounce: 0, duration: 0.8 }}
-            style={{ pointerEvents: (buttonsVisible && !isPersonalInfoOpen) ? 'auto' : 'none' }}
-          >
-            <motion.button 
-              className="icon-btn" 
-              aria-label={isExpanded ? "Info" : "Profile"}
-              onClick={() => {
-                if (isExpanded) {
-                  setIsProjectInfoOpen(!isProjectInfoOpen)
-                } else {
-                  if (isSocialsOpen) setIsSocialsOpen(false)
-                  setIsPersonalInfoOpen(true)
-                }
-              }}
-              animate={{ 
-                width: (!isPersonalInfoOpen) ? 'clamp(52px, 3.8vw, 68px)' : 'clamp(0px, 0vw, 0px)',
-                marginRight: (!isPersonalInfoOpen) ? '0px' : 'calc(-1 * clamp(6px, 0.5vw, 10px))',
-                backgroundColor: (isExpanded && isProjectInfoOpen) ? '#111' : '#fff',
-                color: (isExpanded && isProjectInfoOpen) ? '#fff' : '#111',
-                borderRadius: (isExpanded && isProjectInfoOpen) ? '50%' : '18px'
-              }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              style={{ 
-                position: 'relative',
-                overflow: 'hidden',
-                padding: 0
-              }}
-            >
-              <motion.div
-                animate={{ y: isExpanded ? -60 : 0 }}
-                transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
-                style={{ position: 'absolute', width: 'clamp(52px, 3.8vw, 68px)', height: '100%', top: 0, left: 0 }}
-              >
-                <motion.div
-                  animate={{ opacity: isExpanded ? 0 : 1 }}
-                  transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
-                  style={{ position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="8" r="4.2" />
-                    <path d="M5.5 20.5c0-3.8 2.9-6.5 6.5-6.5s6.5 2.7 6.5 6.5" />
-                  </svg>
-                </motion.div>
-                <motion.div
-                  animate={{ opacity: isExpanded ? 1 : 0 }}
-                  transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
-                  style={{ position: 'absolute', top: '60px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                  </svg>
-                </motion.div>
-              </motion.div>
-            </motion.button>
-          </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ 
@@ -295,11 +237,9 @@ function HeroPage() {
           >
             <motion.button 
               className="icon-btn" 
-              aria-label={isPersonalInfoOpen ? "Go Back" : (isSocialsOpen ? "Close" : (isExpanded ? "Visit Site" : "Chat"))}
+              aria-label={isSocialsOpen ? "Close" : (isExpanded ? "Visit Site" : "Chat")}
               onClick={() => {
-                if (isPersonalInfoOpen) {
-                  setIsPersonalInfoOpen(false)
-                } else if (isExpanded) {
+                if (isExpanded) {
                   if (activeProj?.link && activeProj.link !== '#') {
                     window.open(activeProj.link, '_blank', 'noopener,noreferrer')
                   }
@@ -308,9 +248,9 @@ function HeroPage() {
                 }
               }}
               animate={{ 
-                backgroundColor: (isPersonalInfoOpen || isSocialsOpen) ? '#111' : '#fff',
-                color: (isPersonalInfoOpen || isSocialsOpen) ? '#fff' : '#111',
-                borderRadius: (isPersonalInfoOpen || isSocialsOpen) ? '50%' : '18px',
+                backgroundColor: isSocialsOpen ? '#111' : '#fff',
+                color: isSocialsOpen ? '#fff' : '#111',
+                borderRadius: isSocialsOpen ? '50%' : '18px',
                 width: (isExpanded && isProjectInfoOpen) ? 'clamp(116px, 9.5vw, 136px)' : 'clamp(52px, 3.8vw, 68px)',
                 paddingLeft: (isExpanded && isProjectInfoOpen) ? 'clamp(16px, 1.2vw, 22px)' : 'clamp(0px, 0vw, 0px)',
                 paddingRight: (isExpanded && isProjectInfoOpen) ? 'clamp(16px, 1.2vw, 22px)' : 'clamp(0px, 0vw, 0px)'
@@ -344,25 +284,12 @@ function HeroPage() {
               </AnimatePresence>
               <motion.div
                 animate={{ 
-                  rotate: isPersonalInfoOpen ? -360 : (isSocialsOpen ? -90 : 0),
+                  rotate: isSocialsOpen ? -90 : 0,
                   opacity: (isExpanded && isProjectInfoOpen) ? 0 : 1
                 }}
                 transition={{ duration: 0.4, ease: "easeInOut" }}
                 style={{ width: 'clamp(52px, 3.8vw, 68px)', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: (isExpanded && isProjectInfoOpen) ? 'none' : 'auto' }}
               >
-                {/* Back Icon (<) */}
-                <motion.div
-                  initial={false}
-                  animate={{ 
-                    opacity: isPersonalInfoOpen ? 1 : 0
-                  }}
-                  transition={{ duration: 0.6, ease: "easeInOut" }}
-                  style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <svg style={{ width: '36%', height: '36%' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="15 18 9 12 15 6" />
-                  </svg>
-                </motion.div>
                 {/* Close Icon (X) */}
                 <motion.div
                   initial={false}
@@ -382,7 +309,7 @@ function HeroPage() {
                 <motion.div
                   initial={false}
                   animate={{ 
-                    opacity: (isPersonalInfoOpen || isSocialsOpen) ? 0 : 1
+                    opacity: isSocialsOpen ? 0 : 1
                   }}
                   transition={{ duration: 0.6, ease: "easeInOut" }}
                   style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}
@@ -423,7 +350,7 @@ function HeroPage() {
               </motion.div>
             </motion.button>
           </motion.div>
-          <SocialButtons isOpen={isSocialsOpen || isPersonalInfoOpen} />
+          <SocialButtons isOpen={buttonsVisible && isSocialsOpen} />
         </motion.div>
       </motion.div>
 
@@ -431,10 +358,11 @@ function HeroPage() {
         category={displayedCategory}
         isCategoryTransitioning={isCategoryTransitioning}
         expandedProject={expandedProject} 
-        isPersonalInfoOpen={isPersonalInfoOpen}
+        isPersonalInfoOpen={isDisplayedPersonalInfo}
         isProjectInfoOpen={isProjectInfoOpen}
         onProjectClick={(id) => {
           setExpandedProject(id)
+          setIsSocialsOpen(false)
         }} 
         onToggleProjectInfo={() => {
           setIsProjectInfoOpen((prev) => !prev)

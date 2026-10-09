@@ -67,7 +67,7 @@ export interface ProjectCarouselProps {
   onToggleProjectInfo?: () => void;
   isPersonalInfoOpen?: boolean;
   isProjectInfoOpen?: boolean;
-  category?: 'project' | 'achievement' | 'publication';
+  category?: 'profile' | 'project' | 'achievement' | 'publication';
   isCategoryTransitioning?: boolean;
 }
 
