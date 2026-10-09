@@ -319,13 +319,6 @@ function HeroPage() {
             ease: [0.16, 1, 0.3, 1] 
           }}
         >
-          <Menu 
-            activeCategory={activeCategory} 
-            setActiveCategory={handleCategoryChange} 
-            isVisible={hasShifted && !isExpanded} 
-            delay={initialEntered ? 0.2 : 1.2} 
-          />
-
           <div style={{ position: 'relative', overflow: 'hidden' }}>
             <AnimatePresence mode="popLayout" custom={direction} initial={false}>
               <motion.div
@@ -366,6 +359,13 @@ function HeroPage() {
               </motion.div>
             </AnimatePresence>
           </motion.div>
+
+          <Menu 
+            activeCategory={activeCategory} 
+            setActiveCategory={handleCategoryChange} 
+            isVisible={hasShifted && !isExpanded} 
+            delay={initialEntered ? 0.2 : 1.2} 
+          />
         </motion.div>
 
         {/* HERO BUTTONS (Desktop: rendered inside hero-content) */}
