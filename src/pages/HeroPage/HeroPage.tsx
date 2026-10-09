@@ -86,8 +86,8 @@ function HeroPage() {
   const isExpanded = expandedProject !== null
   const direction = isExpanded ? 1 : -1
   const titleText = activeProj ? activeProj.title : "Aaron Faustine"
-  const subtitleText = activeProj ? "freelance experience" : "Software Engineer \u00A0•\u00A0 UI/UX Designer \u00A0•\u00A0 AI Enthusiast"
-  const isExpandedSubtitle = subtitleText === "freelance experience"
+  const subtitleText = activeProj ? (activeProj.subtitle || "freelance experience") : "Software Engineer \u00A0•\u00A0 UI/UX Designer \u00A0•\u00A0 AI Enthusiast"
+  const isExpandedSubtitle = isExpanded
 
   return (
     <section className="hero-page">

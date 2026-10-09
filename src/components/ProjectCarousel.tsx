@@ -6,7 +6,7 @@ export const PROJECTS: Project[] = [
   {
     id: 1,
     title: 'Linear Design',
-    subtitle: 'Product Experience',
+    subtitle: 'Freelance Experience',
     bg: '/assets/Linear/backgorundLinear.webp',
     video: '/assets/Linear/VideoLinear.mp4',
     tag: 'Information',
@@ -19,7 +19,7 @@ export const PROJECTS: Project[] = [
   {
     id: 2,
     title: 'Deep Learning',
-    subtitle: 'AI Research & Implementation',
+    subtitle: 'Class Project',
     bg: '/assets/DeepLearning/Background.png',
     video: '/assets/DeepLearning/DeepLearning.mp4',
     tag: 'Information',
