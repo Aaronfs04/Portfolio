@@ -29,6 +29,13 @@ dist-ssr
 # Reference files
 public/References
 public/references
+public/scratch
+
 
 .vercel
 .env*
+scratch
+
+.env
+.env.local
+.env.example

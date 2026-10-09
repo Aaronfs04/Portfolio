@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import re
+
+hero_page_code = '''import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 import { ScrambleText } from '../../components/ScrambleText'
 import { ProjectCarousel, PROJECTS } from '../../components/ProjectCarousel'
@@ -74,7 +76,7 @@ function HeroPage() {
   const isExpanded = expandedProject !== null
   const direction = isExpanded ? 1 : -1
   const titleText = activeProj ? activeProj.title : "Aaron Faustine"
-  const subtitleText = activeProj ? "freelance experience" : "Software Engineer \u00A0•\u00A0 AI Enthusiast"
+  const subtitleText = activeProj ? "freelance experience" : "Software Engineer \\u00A0•\\u00A0 AI Enthusiast"
   const isExpandedSubtitle = subtitleText === "freelance experience"
 
   return (
@@ -208,7 +210,7 @@ function HeroPage() {
               >
                 <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="8" r="4.2" />
-                  <path d="M5.5 20.5c0-3.8 2.9-6.5 6.5-6.5s6.5 2.7 6.5 6.5" />
+                  <path d="M5.5 20.5c0-3.8 2.9-6.5 6.5-6.5s6.5 2.7 6.5" />
                 </svg>
               </motion.div>
               <motion.div
@@ -354,3 +356,10 @@ function HeroPage() {
 }
 
 export default HeroPage
+'''
+
+with open(r'C:\Users\Lenovo\Downloads\Portofolio\aaron-portfolio\src\pages\HeroPage\HeroPage.tsx', 'w', encoding='utf-8') as f:
+    f.write(hero_page_code)
+
+print("Restored HeroPage.tsx completely!")
+

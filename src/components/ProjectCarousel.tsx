@@ -1,34 +1,63 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { ProjectPage, Project } from '../pages/ProjectPage/ProjectPage';
 
-const PROJECTS = [
+export const PROJECTS: Project[] = [
   {
     id: 1,
-    title: 'Linear',
+    title: 'Linear Design',
+    subtitle: 'Product Experience',
     bg: '/assets/Linear/backgorundLinear.webp',
     video: '/assets/Linear/VideoLinear.mp4',
+    tag: 'Mandate',
+    description: "Linear builds the standard for modern software development, streamlining issues, sprints, and product roadmaps. The mandate: turn complex workflows into a fast, keyboard-first platform that feels effortless and scales with ambitious teams.",
+    link: 'https://linear.app',
   },
   {
     id: 2,
-    title: '',
+    title: 'Coming Soon!',
+    subtitle: 'Upcoming Project',
     bg: '',
     video: '',
+    tag: 'Concept',
+    description: 'A new creative exploration in progress. Full case study and interactive live preview will be available soon.',
+    link: '#',
   },
   {
     id: 3,
-    title: '',
+    title: 'Coming Soon!',
+    subtitle: 'Upcoming Project',
     bg: '',
     video: '',
+    tag: 'Concept',
+    description: 'A new creative exploration in progress. Full case study and interactive live preview will be available soon.',
+    link: '#',
   },
   {
     id: 4,
-    title: '',
+    title: 'Coming Soon!',
+    subtitle: 'Upcoming Project',
     bg: '',
     video: '',
+    tag: 'Concept',
+    description: 'A new creative exploration in progress. Full case study and interactive live preview will be available soon.',
+    link: '#',
   },
 ];
 
-export function ProjectCarousel() {
+export interface ProjectCarouselProps {
+  expandedProject?: number | null;
+  onProjectClick?: (id: number) => void;
+  isPersonalInfoOpen?: boolean;
+  isProjectInfoOpen?: boolean;
+}
+
+export function ProjectCarousel({ 
+  expandedProject = null, 
+  onProjectClick,
+  isPersonalInfoOpen = false,
+  isProjectInfoOpen = false
+}: ProjectCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const isScrolling = useRef(false);
 
@@ -60,7 +89,7 @@ export function ProjectCarousel() {
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (isScrolling.current) return;
+      if (isScrolling.current || expandedProject !== null || isPersonalInfoOpen) return;
 
       if (e.deltaY > 40) {
         // Scroll down -> next project
@@ -77,7 +106,7 @@ export function ProjectCarousel() {
 
     window.addEventListener('wheel', handleWheel);
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [activeIndex]);
+  }, [activeIndex, expandedProject, isPersonalInfoOpen]);
 
   // Fungsi untuk mendapatkan perbedaan indeks secara melingkar (circular)
   const getWrappedDiff = (i: number, active: number, length: number) => {
@@ -99,7 +128,7 @@ export function ProjectCarousel() {
         }}
         initial={{ y: '-100vh', rotateX: -80, scale: 0.9, opacity: 0 }}
         animate={{ y: 0, rotateX: 0, scale: 1, opacity: 1 }}
-        transition={{ duration: 2.8, ease: [0.16, 1, 0.3, 1], delay: 2.0 }}
+        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 5.0 }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -121,11 +150,33 @@ export function ProjectCarousel() {
             const z = radius * Math.cos(angleRad) - radius;
             const rotateX = angle;
 
-            // Opacity: hilangkan kartu yang terlalu jauh di belakang
-            const opacity = Math.abs(diff) >= 2 ? 0 : (Math.abs(diff) === 1 ? 0.6 : 1);
+            const isExpanded = expandedProject === proj.id;
+            const isAnyExpanded = expandedProject !== null;
+
+            // Opacity: hilangkan kartu yang terlalu jauh di belakang atau saat yang lain di-expand atau saat personal info terbuka
+            let opacity = Math.abs(diff) >= 2 ? 0 : (Math.abs(diff) === 1 ? 0.6 : 1);
+            if (isAnyExpanded && !isExpanded) opacity = 0;
+            if (isPersonalInfoOpen) opacity = 0;
             
-            // Z-index agar kartu yang aktif selalu di atas
-            const zIndex = 10 - Math.abs(diff);
+            // Z-index agar kartu yang aktif atau expanded selalu di atas
+            const zIndex = isExpanded ? 50 : (10 - Math.abs(diff));
+
+            // Jika expanded atau personal info open, timpa nilai transformasi
+            let animX: number | string = isExpanded ? '2vw' : 0;
+            let animY: number | string = isExpanded ? 0 : y;
+            const animZ = isExpanded ? 150 : z;
+            const animRotateX = isExpanded ? 0 : rotateX;
+            const animScale = isExpanded ? 1.75 : (isActive ? 1 : 0.95);
+
+            if (isPersonalInfoOpen) {
+              if (isActive) {
+                animX = '60vw'; // Keluar bergeser ke kanan
+              } else if (diff < 0) {
+                animY = '-70vh'; // Tumpukan atas keluar bergeser ke atas
+              } else if (diff > 0) {
+                animY = '70vh'; // Tumpukan bawah keluar bergeser ke bawah
+              }
+            }
 
             return (
               <motion.div
@@ -138,84 +189,42 @@ export function ProjectCarousel() {
                   width: '100%',
                   height: '100%',
                   transformOrigin: 'center center',
-                  pointerEvents: isActive ? 'auto' : 'none',
+                  pointerEvents: (!isPersonalInfoOpen && (isActive || isExpanded)) ? 'auto' : 'none',
+                  cursor: isActive ? 'pointer' : 'default',
+                }}
+                onClick={() => {
+                  if (isActive && onProjectClick && !isPersonalInfoOpen) {
+                    onProjectClick(proj.id);
+                  }
                 }}
                 animate={{
-                  y: y,
-                  z: z,
-                  rotateX: rotateX,
-                  scale: isActive ? 1 : 0.95,
+                  x: animX,
+                  y: animY,
+                  z: animZ,
+                  rotateX: animRotateX,
+                  scale: animScale,
                   opacity: opacity,
                   zIndex: zIndex,
                 }}
                 transition={{
-                  duration: 0.8,
+                  duration: 1.0,
                   ease: [0.16, 1, 0.3, 1],
                 }}
               >
                 <motion.div
                   className="project-card"
                   style={{
-                    x: isActive ? cardX : 0,
-                    y: isActive ? cardY : 0,
+                    x: (isActive && !isExpanded) ? cardX : 0,
+                    y: (isActive && !isExpanded) ? cardY : 0,
                   }}
                 >
-                  {/* Overlay abu-abu untuk menutupi gambar saat kartu ditumpuk (tidak aktif) */}
-                  <div 
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      backgroundColor: '#e5e7eb', // Warna abu-abu referensi
-                      opacity: isActive ? 0 : 1, // Full abu-abu jika tidak aktif
-                      transition: 'opacity 0.8s ease',
-                      zIndex: 2,
-                      pointerEvents: 'none'
-                    }}
+                  <ProjectPage 
+                    project={proj} 
+                    isActive={isActive} 
+                    isExpanded={isExpanded} 
+                    isProjectInfoOpen={isProjectInfoOpen}
+                    onClose={() => onProjectClick && onProjectClick(proj.id)} 
                   />
-
-                  {/* Background tetap di tempat (mengikuti container utama) */}
-                  {proj.bg && (
-                    <motion.img 
-                      src={proj.bg} 
-                      alt={`${proj.title} Background`} 
-                      className="project-card-bg" 
-                      style={{ 
-                        opacity: isActive ? 1 : 0, 
-                        transition: 'opacity 0.8s ease',
-                      }} 
-                    />
-                  )}
-                  
-                  {/* Video tetap di tempat (mengikuti container utama) */}
-                  {proj.video && (
-                    <motion.div 
-                      className="project-card-video-wrapper" 
-                      style={{ 
-                        opacity: isActive ? 1 : 0, 
-                        transition: 'opacity 0.5s',
-                      }}
-                    >
-                      {isActive && (
-                        <video
-                          src={proj.video}
-                          className="project-card-video"
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                        />
-                      )}
-                    </motion.div>
-                  )}
-
-                  {proj.title && (
-                    <div className="project-card-title" style={{ opacity: isActive ? 1 : 0, transition: 'opacity 0.5s' }}>
-                      {proj.title}
-                    </div>
-                  )}
                 </motion.div>
               </motion.div>
             );
@@ -223,19 +232,26 @@ export function ProjectCarousel() {
         </div>
       </motion.div>
 
-      {/* Titik-titik Navigasi / Pagination di Sisi Kanan Mentok Layar */}
       <motion.div
         className="project-pagination-dots"
         initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 2.2, duration: 0.8 }}
+        animate={{ 
+          opacity: (expandedProject || isPersonalInfoOpen) ? 0 : 1, 
+          x: (expandedProject || isPersonalInfoOpen) ? 40 : 0 
+        }}
+        transition={{ 
+          delay: (expandedProject || isPersonalInfoOpen) ? 0 : (expandedProject === null ? 0.2 : 5.75), 
+          duration: 0.8,
+          ease: [0.16, 1, 0.3, 1]
+        }}
+        style={{ pointerEvents: (expandedProject || isPersonalInfoOpen) ? 'none' : 'auto' }}
       >
         {PROJECTS.map((_, i) => (
           <span
             key={i}
             className={`dot ${i === activeIndex ? 'active' : ''}`}
             onClick={() => {
-              if (isScrolling.current) return;
+              if (isScrolling.current || expandedProject !== null) return;
               isScrolling.current = true;
               setActiveIndex(i);
               setTimeout(() => (isScrolling.current = false), 1000);
