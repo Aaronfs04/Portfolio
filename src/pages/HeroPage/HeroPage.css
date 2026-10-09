@@ -112,6 +112,13 @@
    PENYESUAIAN TAMBAHAN (TABLET & MOBILE)
    ========================================================================== */
 
+@media (max-width: 1440px) {
+  .hero-page {
+    padding-left: clamp(8vw, 12vw, 15vw);
+    padding-right: clamp(8vw, 12vw, 15vw);
+  }
+}
+
 @media (max-width: 1024px) {
   .hero-page {
     padding-left: 10vw;
@@ -125,8 +132,19 @@
     padding-right: 6vw;
     padding-top: 3rem;
     padding-bottom: 3rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4rem;
+  }
+  .hero-content {
+    align-items: center;
+    text-align: center;
+  }
+  .hero-buttons {
+    justify-content: center;
   }
 }
+
 
 /* ==========================================================================
    PROJECT CARD (RIGHT COLUMN)
@@ -256,22 +274,4 @@
   background-color: #111111;
   transform: scale(1.15);
 }
-
-/* Penyesuaian saat di HP agar tumpuk (kolom) */
-@media (max-width: 1024px) {
-  .hero-page {
-    flex-direction: column;
-    justify-content: center;
-    gap: 4rem;
-  }
-  .hero-content {
-    align-items: center;
-    text-align: center;
-  }
-  .hero-buttons {
-    justify-content: center;
-  }
-}
-
-
 

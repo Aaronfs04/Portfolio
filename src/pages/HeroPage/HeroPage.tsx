@@ -92,10 +92,10 @@ function HeroPage() {
       setTimeout(() => setInitialEntered(true), 1200)
     }, 2800)
 
-    // Buka tombol contact secara otomatis setelah semua elemen & aset muncul sempurna (~4.0s)
+    // Buka tombol contact secara otomatis lebih cepat 0.5s (~3.5s)
     const autoOpenTimer = setTimeout(() => {
       setIsSocialsOpen(true)
-    }, 4000)
+    }, 3500)
 
     return () => {
       clearTimeout(shiftTimer)

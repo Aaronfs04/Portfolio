@@ -83,6 +83,14 @@ export function ProjectCarousel({
   const [activeIndex, setActiveIndex] = useState(0);
   const isScrolling = useRef(false);
 
+  // Responsiveness state
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // --- Parallax & Tilt Hover State ---
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -181,7 +189,7 @@ export function ProjectCarousel({
 
             // Tentukan posisi 3D berdasarkan kedudukannya relatif terhadap activeIndex
             // Menggunakan rumus silinder 3D untuk tumpukan dan animasi yang akurat
-            const radius = 420; // Jari-jari silinder (mengatur jarak antar kartu)
+            const radius = windowWidth < 768 ? 250 : (windowWidth < 1024 ? 320 : (windowWidth < 1440 ? 360 : 420));
             const anglePerCard = 75; // Sudut per kartu dalam derajat
             const angle = diff * anglePerCard;
             const angleRad = angle * (Math.PI / 180);
