@@ -107,7 +107,7 @@ export function PersonalPage({ isOpen, onScroll }: PersonalPageProps) {
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             >
               <img
-                src="/assets/PersonalInfo/FotoFormal2.png"
+                src="/assets/Personal/FotoFormal2.png"
                 alt="Aaron Faustine"
                 className="pi-photo-img"
               />

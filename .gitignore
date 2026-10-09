@@ -41,3 +41,4 @@ scratch
 .env.example
 
 public/scratch
+public/assets
