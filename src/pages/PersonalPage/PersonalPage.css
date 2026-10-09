@@ -229,11 +229,42 @@
 }
 
 .pi-photo-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center 8%;
   display: block;
+}
+
+/* Blurred version of the personal photo (displays immediately while loading) */
+.pi-photo-blur {
+  filter: blur(24px);
+  transform: scale(1.12);
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pi-photo-blur.pi-photo-blur-hidden {
+  opacity: 0;
+}
+
+/* Crisp high-resolution personal photo */
+.pi-photo-full {
+  z-index: 2;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pi-photo-full.pi-loading {
+  opacity: 0;
+  filter: blur(14px);
+}
+
+.pi-photo-full.pi-loaded {
+  opacity: 1;
+  filter: blur(0px);
 }
 
 /* Responsive adjustments */

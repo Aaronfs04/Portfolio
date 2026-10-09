@@ -1,7 +1,11 @@
-import { useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import './PersonalPage.css';
+
+// Low-res blurred placeholder generated directly from FotoFormal2.png (1.2KB instant base64)
+const PHOTO_BLUR_PLACEHOLDER =
+  'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAAtACADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD712YNfFH7Vv7c2r/DjxnceD/AtrayX1kwjvL+5iM373HMcaDjjPJPfjHFfbuAfrXy9oXwC0/w38Y/E3i46Rbas2oalLK0t1EJfs8bkMQoLDbyTzhifQVVWoqcbs2oUXXlyo8h/Zn/AG+vE3ib4jaV4P8AiRpyQ/2wwhsr+K1MDLKThA69CG6ZA44r71ZSK+bfiT8Ll8deOPDOqXGnW1rZ6PrFtc2tykCq6hJVLruDEnKqRgqOcYr6YcY5qKNX2quViaDoSt0FD46VxHi69gtNSe2hZy08atcpboJHjG75WK4PDYI/Cvi74tf8FLr+Y3Vl4A0NLSIMypq2qfO7D+8sI4X/AIET9K2f2Kfj5Pr2j/E7VPH+vO92sljfHULlC+3cWiK4UfKn3BwMDg1pVpOpBpbk4asqNVSb0Pp3wxe2t74oh06ZpRbxtJJALuMRGWXGSqrgdBk/hXp7txXwL+2x8eIpfA/gGfwPqc8NxPqU+oxarADGxMIEY2HuN0kgPqVI6Vz3wj/4KQeJNHFvZ+PNMh16zGFbULMCG5UdyV+4/CAWlRpOnBX3ZWLr+2qtp6I+LEcOWU9iQa9L+DfxQl8B2XjHT4oxI3iLSG0r58bUJljcsc/7Cvj3IryKK6c6tcRfwhVb8f8itawBOqWyg7dzoc/iK7IvW6POZ6/+0f49i8WXXgfTrZIoYdE8M2ViYoBhFmKl5Tj1JbJ968ZnuRGgQHkkAVJqF29zqV3I5yQeMnPr/gKxEmaTUoUJ4yx/SlJ3YI//9k=';
 
 export interface PersonalPageProps {
   isOpen: boolean;
@@ -9,9 +13,18 @@ export interface PersonalPageProps {
 }
 
 export function PersonalPage({ isOpen, onScroll }: PersonalPageProps) {
+  const [isPhotoLoaded, setIsPhotoLoaded] = useState(false);
+  const photoRef = useRef<HTMLImageElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const targetScroll = useRef(0);
   const prevIsOpen = useRef(isOpen);
+
+  // Check if image is already loaded/cached when page opens
+  useEffect(() => {
+    if (photoRef.current && photoRef.current.complete && photoRef.current.naturalWidth > 0) {
+      setIsPhotoLoaded(true);
+    }
+  }, [isOpen]);
 
   // Reset scroll position to top ONLY when isOpen changes from false to true
   useEffect(() => {
@@ -106,10 +119,21 @@ export function PersonalPage({ isOpen, onScroll }: PersonalPageProps) {
               exit={{ opacity: 0, scale: 0.92, y: 30 }}
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             >
+              {/* Blurred placeholder of the same personal photo (shows immediately while loading) */}
               <img
+                src={PHOTO_BLUR_PLACEHOLDER}
+                alt="Aaron Faustine Placeholder"
+                className={`pi-photo-img pi-photo-blur ${isPhotoLoaded ? 'pi-photo-blur-hidden' : ''}`}
+                aria-hidden="true"
+              />
+
+              {/* High-res personal photo with smooth fade-in & unblur transition */}
+              <img
+                ref={photoRef}
                 src="/assets/Personal/FotoFormal2.png"
                 alt="Aaron Faustine"
-                className="pi-photo-img"
+                className={`pi-photo-img pi-photo-full ${isPhotoLoaded ? 'pi-loaded' : 'pi-loading'}`}
+                onLoad={() => setIsPhotoLoaded(true)}
               />
             </motion.div>
           </div>
