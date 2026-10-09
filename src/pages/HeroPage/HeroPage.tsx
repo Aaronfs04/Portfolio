@@ -29,6 +29,7 @@ function HeroPage() {
   const [initialEntered, setInitialEntered] = useState(false)
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(false)
   const [isSocialsOpen, setIsSocialsOpen] = useState(false)
+  const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false)
   const hasOpenedProject = useRef(false)
   if (expandedProject !== null) {
     hasOpenedProject.current = true
@@ -83,7 +84,10 @@ function HeroPage() {
         {isExpanded && (
           <motion.button
             className="icon-btn shrink-btn"
-            onClick={() => setExpandedProject(null)}
+            onClick={() => {
+              setExpandedProject(null)
+              setIsProjectInfoOpen(false)
+            }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
@@ -173,76 +177,75 @@ function HeroPage() {
           style={{ display: 'flex', gap: 'clamp(6px, 0.5vw, 10px)', position: 'relative' }}
         >
           {/* PROFILE BUTTON - ALWAYS MOUNTED */}
-          <motion.button 
-            layout
-            className="icon-btn" 
-            aria-label={isExpanded ? "Info" : "Profile"}
-            onClick={isExpanded ? undefined : () => {
-              if (isSocialsOpen) setIsSocialsOpen(false)
-              setIsPersonalInfoOpen(true)
-            }}
+          <motion.div
             initial={false}
             animate={{ 
               opacity: (buttonsVisible && !isPersonalInfoOpen) ? 1 : 0, 
-              y: !buttonsVisible ? 32 : (isExpanded ? 60 : 0),
-              width: (!isPersonalInfoOpen) ? 'clamp(52px, 3.8vw, 68px)' : 0,
-              marginRight: (!isPersonalInfoOpen) ? 0 : 'calc(-1 * clamp(6px, 0.5vw, 10px))'
+              y: !buttonsVisible ? 32 : (isExpanded ? 60 : 0)
             }}
             transition={{ type: "spring", bounce: 0, duration: 0.8 }}
-            style={{ 
-              pointerEvents: (buttonsVisible && !isPersonalInfoOpen) ? 'auto' : 'none',
-              position: 'relative',
-              overflow: 'hidden',
-              padding: 0
-            }}
+            style={{ pointerEvents: (buttonsVisible && !isPersonalInfoOpen) ? 'auto' : 'none' }}
           >
-            <motion.div
-              animate={{ y: isExpanded ? -60 : 0 }}
-              transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
-              style={{ position: 'absolute', width: 'clamp(52px, 3.8vw, 68px)', height: '100%', top: 0, left: 0 }}
+            <motion.button 
+              className="icon-btn" 
+              aria-label={isExpanded ? "Info" : "Profile"}
+              onClick={() => {
+                if (isExpanded) {
+                  setIsProjectInfoOpen(!isProjectInfoOpen)
+                } else {
+                  if (isSocialsOpen) setIsSocialsOpen(false)
+                  setIsPersonalInfoOpen(true)
+                }
+              }}
+              animate={{ 
+                width: (!isPersonalInfoOpen) ? 'clamp(52px, 3.8vw, 68px)' : 'clamp(0px, 0vw, 0px)',
+                marginRight: (!isPersonalInfoOpen) ? '0px' : 'calc(-1 * clamp(6px, 0.5vw, 10px))',
+                backgroundColor: (isExpanded && isProjectInfoOpen) ? '#111' : '#fff',
+                color: (isExpanded && isProjectInfoOpen) ? '#fff' : '#111',
+                borderRadius: (isExpanded && isProjectInfoOpen) ? '50%' : '18px'
+              }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              style={{ 
+                position: 'relative',
+                overflow: 'hidden',
+                padding: 0
+              }}
             >
               <motion.div
-                animate={{ opacity: isExpanded ? 0 : 1 }}
+                animate={{ y: isExpanded ? -60 : 0 }}
                 transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
-                style={{ position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ position: 'absolute', width: 'clamp(52px, 3.8vw, 68px)', height: '100%', top: 0, left: 0 }}
               >
-                <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="8" r="4.2" />
-                  <path d="M5.5 20.5c0-3.8 2.9-6.5 6.5-6.5s6.5 2.7 6.5 6.5" />
-                </svg>
+                <motion.div
+                  animate={{ opacity: isExpanded ? 0 : 1 }}
+                  transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="8" r="4.2" />
+                    <path d="M5.5 20.5c0-3.8 2.9-6.5 6.5-6.5s6.5 2.7 6.5 6.5" />
+                  </svg>
+                </motion.div>
+                <motion.div
+                  animate={{ opacity: isExpanded ? 1 : 0 }}
+                  transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ position: 'absolute', top: '60px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </motion.div>
               </motion.div>
-              <motion.div
-                animate={{ opacity: isExpanded ? 1 : 0 }}
-                transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
-                style={{ position: 'absolute', top: '60px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="16" x2="12" y2="12"></line>
-                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-              </motion.div>
-            </motion.div>
-          </motion.button>
+            </motion.button>
+          </motion.div>
 
-          <motion.button 
-            layout
-            className="icon-btn" 
-            aria-label={isPersonalInfoOpen ? "Go Back" : (isSocialsOpen ? "Close" : (isExpanded ? "Visit Site" : "Chat"))}
-            onClick={() => {
-              if (isPersonalInfoOpen) {
-                setIsPersonalInfoOpen(false)
-              } else if (!isExpanded) {
-                setIsSocialsOpen(!isSocialsOpen)
-              }
-            }}
+          <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ 
               opacity: buttonsVisible ? 1 : 0, 
-              y: !buttonsVisible ? 32 : (isExpanded ? 60 : 0),
-              backgroundColor: (isPersonalInfoOpen || isSocialsOpen) ? '#111' : '#fff',
-              color: (isPersonalInfoOpen || isSocialsOpen) ? '#fff' : '#111',
-              borderRadius: (isPersonalInfoOpen || isSocialsOpen) ? '50%' : '18px'
+              y: !buttonsVisible ? 32 : (isExpanded ? 60 : 0)
             }}
             transition={{ 
               type: "spring", 
@@ -250,93 +253,141 @@ function HeroPage() {
               duration: 0.8,
               delay: (!initialEntered && buttonsVisible) ? 0.14 : 0
             }}
-            style={{ 
-              pointerEvents: buttonsVisible ? 'auto' : 'none',
-              position: 'relative',
-              overflow: 'hidden',
-              padding: 0
-            }}
+            style={{ pointerEvents: buttonsVisible ? 'auto' : 'none' }}
           >
-            {/* INNER WRAPPER FOR ROTATION */}
-            <motion.div
-              animate={{ rotate: isPersonalInfoOpen ? -360 : (isSocialsOpen ? -90 : 0) }}
-              transition={{ type: "spring", bounce: 0, duration: 0.8 }}
-              style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+            <motion.button 
+              className="icon-btn" 
+              aria-label={isPersonalInfoOpen ? "Go Back" : (isSocialsOpen ? "Close" : (isExpanded ? "Visit Site" : "Chat"))}
+              onClick={() => {
+                if (isPersonalInfoOpen) {
+                  setIsPersonalInfoOpen(false)
+                } else if (isExpanded) {
+                  if (activeProj?.link && activeProj.link !== '#') {
+                    window.open(activeProj.link, '_blank', 'noopener,noreferrer')
+                  }
+                } else {
+                  setIsSocialsOpen(!isSocialsOpen)
+                }
+              }}
+              animate={{ 
+                backgroundColor: (isPersonalInfoOpen || isSocialsOpen) ? '#111' : '#fff',
+                color: (isPersonalInfoOpen || isSocialsOpen) ? '#fff' : '#111',
+                borderRadius: (isPersonalInfoOpen || isSocialsOpen) ? '50%' : '18px',
+                width: (isExpanded && isProjectInfoOpen) ? 'clamp(116px, 9.5vw, 136px)' : 'clamp(52px, 3.8vw, 68px)',
+                paddingLeft: (isExpanded && isProjectInfoOpen) ? 'clamp(16px, 1.2vw, 22px)' : 'clamp(0px, 0vw, 0px)',
+                paddingRight: (isExpanded && isProjectInfoOpen) ? 'clamp(16px, 1.2vw, 22px)' : 'clamp(0px, 0vw, 0px)'
+              }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              style={{ 
+                position: 'relative',
+                overflow: 'hidden',
+                paddingTop: 0,
+                paddingBottom: 0
+              }}
             >
-              {/* Back Icon (<) */}
-              <motion.div
-                initial={false}
-                animate={{ 
-                  opacity: isPersonalInfoOpen ? 1 : 0
-                }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
-                style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <svg style={{ width: '36%', height: '36%' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              </motion.div>
-
-              {/* Close Icon (X) */}
-              <motion.div
-                initial={false}
-                animate={{ 
-                  opacity: isSocialsOpen ? 1 : 0,
-                  scale: isSocialsOpen ? 1 : 0.5
-                }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
-                style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <svg style={{ width: '36%', height: '36%' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </motion.div>
-
-              {/* Chat Icon & External Link Icon (wrapper) */}
-              <motion.div
-                initial={false}
-                animate={{ 
-                  opacity: (isPersonalInfoOpen || isSocialsOpen) ? 0 : 1
-                }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
-                style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}
-              >
-                <motion.div
-                  animate={{ y: isExpanded ? -60 : 0 }}
-                  transition={{ 
-                    delay: !hasOpenedProject.current ? 0 : 0.1,
-                    duration: 1.15, 
-                    ease: [0.16, 1, 0.3, 1] 
-                  }}
-                  style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}
-                >
+              <AnimatePresence>
+                {(isExpanded && isProjectInfoOpen) && (
                   <motion.div
-                    animate={{ opacity: isExpanded ? 0 : 1 }}
-                    transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1], delay: !hasOpenedProject.current ? 0 : 0.1 }}
-                    style={{ position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    key="see-live"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', fontWeight: 500, fontSize: 'clamp(0.85rem, 0.9vw, 0.95rem)', color: '#111' }}
                   >
-                    <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 20.5a8.5 8.5 0 1 0-6.8-3.4L4 20l2.9-1.2A8.4 8.4 0 0 0 12 20.5z" />
-                      <circle cx="9.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
-                      <circle cx="14.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
-                    </svg>
-                  </motion.div>
-                  <motion.div
-                    animate={{ opacity: isExpanded ? 1 : 0 }}
-                    transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1], delay: !hasOpenedProject.current ? 0 : 0.1 }}
-                    style={{ position: 'absolute', top: '60px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                    <span>See live</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 'clamp(14px, 1vw, 17px)', height: 'clamp(14px, 1vw, 17px)' }}>
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                       <polyline points="15 3 21 3 21 9"></polyline>
                       <line x1="10" y1="14" x2="21" y2="3"></line>
                     </svg>
                   </motion.div>
+                )}
+              </AnimatePresence>
+
+              <motion.div
+                animate={{ 
+                  rotate: isPersonalInfoOpen ? -360 : (isSocialsOpen ? -90 : 0),
+                  opacity: (isExpanded && isProjectInfoOpen) ? 0 : 1
+                }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                style={{ width: 'clamp(52px, 3.8vw, 68px)', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: (isExpanded && isProjectInfoOpen) ? 'none' : 'auto' }}
+              >
+                {/* Back Icon (<) */}
+                <motion.div
+                  initial={false}
+                  animate={{ 
+                    opacity: isPersonalInfoOpen ? 1 : 0
+                  }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <svg style={{ width: '36%', height: '36%' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                </motion.div>
+
+                {/* Close Icon (X) */}
+                <motion.div
+                  initial={false}
+                  animate={{ 
+                    opacity: isSocialsOpen ? 1 : 0,
+                    scale: isSocialsOpen ? 1 : 0.5
+                  }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <svg style={{ width: '36%', height: '36%' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </motion.div>
+
+                {/* Chat Icon & External Link Icon (wrapper) */}
+                <motion.div
+                  initial={false}
+                  animate={{ 
+                    opacity: (isPersonalInfoOpen || isSocialsOpen) ? 0 : 1
+                  }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}
+                >
+                  <motion.div
+                    animate={{ y: isExpanded ? -60 : 0 }}
+                    transition={{ 
+                      delay: !hasOpenedProject.current ? 0 : 0.1,
+                      duration: 1.15, 
+                      ease: [0.16, 1, 0.3, 1] 
+                    }}
+                    style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}
+                  >
+                    <motion.div
+                      animate={{ opacity: isExpanded ? 0 : 1 }}
+                      transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1], delay: !hasOpenedProject.current ? 0 : 0.1 }}
+                      style={{ position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 20.5a8.5 8.5 0 1 0-6.8-3.4L4 20l2.9-1.2A8.4 8.4 0 0 0 12 20.5z" />
+                        <circle cx="9.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
+                        <circle cx="14.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
+                      </svg>
+                    </motion.div>
+                    <motion.div
+                      animate={{ opacity: isExpanded ? 1 : 0 }}
+                      transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1], delay: !hasOpenedProject.current ? 0 : 0.1 }}
+                      style={{ position: 'absolute', top: '60px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                    </motion.div>
+                  </motion.div>
                 </motion.div>
               </motion.div>
-            </motion.div>
-          </motion.button>
+            </motion.button>
+          </motion.div>
 
           <SocialButtons isOpen={isSocialsOpen || isPersonalInfoOpen} />
         </motion.div>
@@ -345,7 +396,12 @@ function HeroPage() {
       <ProjectCarousel 
         expandedProject={expandedProject} 
         isPersonalInfoOpen={isPersonalInfoOpen}
-        onProjectClick={(id) => setExpandedProject(expandedProject === id ? null : id)} 
+        isProjectInfoOpen={isProjectInfoOpen}
+        onProjectClick={(id) => {
+          const isClosing = expandedProject === id
+          setExpandedProject(isClosing ? null : id)
+          if (isClosing) setIsProjectInfoOpen(false)
+        }} 
       />
 
       <PersonalPage isOpen={isPersonalInfoOpen} />
