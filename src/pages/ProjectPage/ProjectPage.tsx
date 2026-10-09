@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { ProjectInfoPage } from '../ProjectInfoPage/ProjectInfoPage';
 import './ProjectPage.css';
 
 export interface Project {
@@ -11,6 +11,9 @@ export interface Project {
   tag?: string;
   description?: string;
   link?: string;
+  role?: string;
+  status?: string;
+  tech?: string;
 }
 
 interface ProjectPageProps {
@@ -27,7 +30,6 @@ export function ProjectPage({
   isExpanded, 
   isProjectInfoOpen = false 
 }: ProjectPageProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const isVisible = isActive || isExpanded;
 
   return (
@@ -102,34 +104,11 @@ export function ProjectPage({
         {project.title}
       </div>
 
-      {/* White Info Overlay saat isProjectInfoOpen aktif */}
-      <AnimatePresence>
-        {isExpanded && isProjectInfoOpen && (
-          <motion.div
-            className="project-page-info-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: 1,
-              backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.86)' : 'rgba(255, 255, 255, 1)',
-              backdropFilter: isHovered ? 'blur(10px)' : 'none',
-            }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            {/* Tag / Category at Top */}
-            <div className="project-info-tag">
-              {project.tag || 'Mandate'}
-            </div>
-
-            {/* Project Explanation at Bottom */}
-            <div className="project-info-desc">
-              {project.description || 'Project details and case study breakdown.'}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Project Info Overlay Page (terpisah) */}
+      <ProjectInfoPage 
+        project={project} 
+        isOpen={isExpanded && isProjectInfoOpen} 
+      />
     </div>
   );
 }

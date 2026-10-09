@@ -1,32 +1,266 @@
-.pi-bottom-text {
-  position: absolute;
-  bottom: clamp(2rem, 4vw, 4rem);
-  left: clamp(6vw, 14vw, 18vw);
-  max-width: 520px;
-  font-size: clamp(calc(0.9rem + 5px), calc(0.8rem + 0.5vw + 5px), calc(1.1rem + 5px));
-  line-height: 1.5;
-  color: #888;
-  margin: 0;
+/* Fullscreen container for Personal Page */
+.pi-page-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
   z-index: 20;
+  pointer-events: auto;
 }
 
-.pi-bottom-text strong {
-  color: #111;
+/* Scrollable container */
+.pi-scroll-view {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pi-scroll-view::-webkit-scrollbar {
+  display: none;
+}
+
+/* Inner content aligned with Hero layout */
+.pi-scroll-inner {
+  box-sizing: border-box;
+  padding-left: clamp(6vw, 14vw, 18vw);
+  padding-right: clamp(6vw, 14vw, 18vw);
+  max-width: 1920px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top spacer so the first paragraph sits right at the bottom on initial load */
+.pi-top-spacer {
+  height: calc(100vh - clamp(1rem, 2vw, 2.5rem) - 5.5rem);
+  height: calc(100dvh - clamp(1rem, 2vw, 2.5rem) - 5.5rem);
+  flex-shrink: 0;
+}
+
+/* Base typography for personal text */
+.pi-text {
+  max-width: clamp(520px, 42vw, 680px);
+  font-size: clamp(1.2rem, 1.05rem + 0.65vw, 1.65rem);
+  line-height: 1.42;
+  color: #71717a;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+/* Section 1: Intro Text */
+.pi-intro-text {
+  margin-top: 0;
+}
+
+/* Section 2: Secondary / Extended Bio */
+.pi-secondary-text {
+  margin-top: clamp(2.5rem, 4vw, 4.5rem);
+}
+
+/* Section 3: Recognitions / Highlights */
+.pi-recognitions-section {
+  margin-top: clamp(3rem, 5vw, 5rem);
+  max-width: clamp(520px, 42vw, 680px);
+}
+
+.pi-section-title {
+  font-size: clamp(0.85rem, 0.9vw, 1rem);
+  font-weight: 500;
+  color: #111111;
+  letter-spacing: -0.01em;
+  margin: 0 0 clamp(1rem, 1.5vw, 1.5rem) 0;
+}
+
+.pi-highlights-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.6rem, 1vw, 0.9rem);
+}
+
+.pi-highlight-item {
+  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
+  line-height: 1.3;
+  color: #111111;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.pi-hl-name {
+  color: #111111;
+}
+
+.pi-hl-tag {
+  color: #9ca3af;
+  font-weight: 400;
+  font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.25rem);
+}
+
+/* Section 4: Location & Availability */
+.pi-location-text {
+  margin-top: clamp(3rem, 5vw, 5rem);
+}
+
+.pi-location-sub {
+  margin-top: 0.4rem;
+}
+
+.pi-highlight-dark {
+  color: #111111;
   font-weight: 500;
 }
 
+/* Section 5: Footer Note */
+.pi-footer-text {
+  margin-top: clamp(3rem, 4.5vw, 4.5rem);
+  font-size: clamp(0.8rem, 0.82vw, 0.92rem);
+  color: #9ca3af;
+  letter-spacing: -0.01em;
+  margin-bottom: 0;
+  padding-bottom: clamp(8rem, 14vh, 12rem);
+}
+
+/* Bottom progressive blur & fade mask overlay */
+.pi-bottom-blur-mask {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: clamp(6.5rem, 12vh, 9.5rem);
+  pointer-events: none;
+  z-index: 25;
+  overflow: hidden;
+}
+
+.pi-bottom-blur-mask::before,
+.pi-bottom-blur-mask::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Layer 1: Ambient feather blur */
+.pi-bottom-blur-mask::before {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.04) 15%,
+    rgba(0, 0, 0, 0.2) 35%,
+    rgba(0, 0, 0, 0.55) 65%,
+    black 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.04) 15%,
+    rgba(0, 0, 0, 0.2) 35%,
+    rgba(0, 0, 0, 0.55) 65%,
+    black 100%
+  );
+}
+
+/* Layer 2: Deep progressive smooth blur */
+.pi-bottom-blur-mask::after {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(
+    to bottom,
+    rgba(245, 245, 245, 0) 0%,
+    rgba(245, 245, 245, 0.03) 25%,
+    rgba(245, 245, 245, 0.1) 50%,
+    rgba(245, 245, 245, 0.22) 75%,
+    rgba(245, 245, 245, 0.38) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 20%,
+    rgba(0, 0, 0, 0.08) 40%,
+    rgba(0, 0, 0, 0.4) 68%,
+    black 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 20%,
+    rgba(0, 0, 0, 0.08) 40%,
+    rgba(0, 0, 0, 0.4) 68%,
+    black 100%
+  );
+}
+
+/* Right fixed stage for Personal Photo Card */
+.pi-fixed-stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-left: clamp(6vw, 14vw, 18vw);
+  padding-right: clamp(5vw, 10vw, 13vw);
+  max-width: 1920px;
+  margin: 0 auto;
+  z-index: 22;
+  box-sizing: border-box;
+}
+
+.pi-photo-card {
+  position: relative;
+  width: clamp(260px, 24vw, 420px);
+  aspect-ratio: 1 / 1;
+  border-radius: clamp(14px, 1.5vw, 24px);
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  background-color: #e5e7eb;
+  flex-shrink: 0;
+}
+
+.pi-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 8%;
+  display: block;
+}
+
+/* Responsive adjustments */
 @media (max-width: 1024px) {
-  .pi-bottom-text {
-    left: 10vw;
+  .pi-fixed-stage {
+    display: none;
+  }
+  .pi-scroll-inner {
+    padding-left: 10vw;
+    padding-right: 8vw;
   }
 }
 
 @media (max-width: 768px) {
-  .pi-bottom-text {
-    left: 6vw;
-    right: 6vw;
-    text-align: center;
+  .pi-scroll-inner {
+    padding-left: 6vw;
+    padding-right: 6vw;
+    text-align: left;
+  }
+  
+  .pi-text,
+  .pi-recognitions-section {
     max-width: none;
   }
+  
+  .pi-top-spacer {
+    height: calc(100vh - clamp(1rem, 2vw, 2.5rem) - 7rem);
+    height: calc(100dvh - clamp(1rem, 2vw, 2.5rem) - 7rem);
+  }
 }
-

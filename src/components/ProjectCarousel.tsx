@@ -9,9 +9,12 @@ export const PROJECTS: Project[] = [
     subtitle: 'Product Experience',
     bg: '/assets/Linear/backgorundLinear.webp',
     video: '/assets/Linear/VideoLinear.mp4',
-    tag: 'Mandate',
-    description: "Linear builds the standard for modern software development, streamlining issues, sprints, and product roadmaps. The mandate: turn complex workflows into a fast, keyboard-first platform that feels effortless and scales with ambitious teams.",
-    link: 'https://linear.app',
+    tag: 'Information',
+    description: "A business portfolio website for Linear Studio, a multidisciplinary studio working across architecture, interior design, and graphic design. The site serves as the studio’s digital presence, showcasing its work and identity through an artistic, original, and intentionally non-templated experience.",
+    role: "Frontend Developer, UI/UX Designer",
+    status: "Completed",
+    tech: "Next.js, React, TypeScript, GSAP, CSS Modules, ImageKit, Cloudflare Pages, GitHub Actions",
+    link: import.meta.env.VITE_PROJECT_LINEAR_URL || 'https://halolinear.com',
   },
   {
     id: 2,
@@ -48,6 +51,7 @@ export const PROJECTS: Project[] = [
 export interface ProjectCarouselProps {
   expandedProject?: number | null;
   onProjectClick?: (id: number) => void;
+  onToggleProjectInfo?: () => void;
   isPersonalInfoOpen?: boolean;
   isProjectInfoOpen?: boolean;
 }
@@ -55,6 +59,7 @@ export interface ProjectCarouselProps {
 export function ProjectCarousel({ 
   expandedProject = null, 
   onProjectClick,
+  onToggleProjectInfo,
   isPersonalInfoOpen = false,
   isProjectInfoOpen = false
 }: ProjectCarouselProps) {
@@ -124,7 +129,8 @@ export function ProjectCarousel({
         style={{ 
           perspective: 1200,
           /* Geser ke kiri sedikit */
-          marginLeft: '-4vw'
+          marginLeft: '-4vw',
+          pointerEvents: isPersonalInfoOpen ? 'none' : 'auto'
         }}
         initial={{ y: '-100vh', rotateX: -80, scale: 0.9, opacity: 0 }}
         animate={{ y: 0, rotateX: 0, scale: 1, opacity: 1 }}
@@ -190,10 +196,15 @@ export function ProjectCarousel({
                   height: '100%',
                   transformOrigin: 'center center',
                   pointerEvents: (!isPersonalInfoOpen && (isActive || isExpanded)) ? 'auto' : 'none',
-                  cursor: isActive ? 'pointer' : 'default',
+                  cursor: (!isPersonalInfoOpen && (isActive || isExpanded)) ? 'pointer' : 'default',
                 }}
                 onClick={() => {
-                  if (isActive && onProjectClick && !isPersonalInfoOpen) {
+                  if (isPersonalInfoOpen) return;
+                  if (isExpanded) {
+                    if (onToggleProjectInfo) {
+                      onToggleProjectInfo();
+                    }
+                  } else if (isActive && onProjectClick) {
                     onProjectClick(proj.id);
                   }
                 }}

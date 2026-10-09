@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 import { ScrambleText } from '../../components/ScrambleText'
 import { ProjectCarousel, PROJECTS } from '../../components/ProjectCarousel'
@@ -28,12 +28,23 @@ function HeroPage() {
   const [buttonsVisible, setButtonsVisible] = useState(false)
   const [initialEntered, setInitialEntered] = useState(false)
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(false)
+  const [personalScrollY, setPersonalScrollY] = useState(0)
   const [isSocialsOpen, setIsSocialsOpen] = useState(false)
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false)
   const hasOpenedProject = useRef(false)
   if (expandedProject !== null) {
     hasOpenedProject.current = true
   }
+
+  useEffect(() => {
+    if (!isPersonalInfoOpen) {
+      setPersonalScrollY(0)
+    }
+  }, [isPersonalInfoOpen])
+
+  const handlePersonalScroll = useCallback((y: number) => {
+    setPersonalScrollY(y)
+  }, [])
 
   // --- Magnetic Y Cursor untuk tombol Minimize ---
   const mouseY = useMotionValue(0)
@@ -75,7 +86,7 @@ function HeroPage() {
   const isExpanded = expandedProject !== null
   const direction = isExpanded ? 1 : -1
   const titleText = activeProj ? activeProj.title : "Aaron Faustine"
-  const subtitleText = activeProj ? "freelance experience" : "Software Engineer \u00A0•\u00A0 AI Enthusiast"
+  const subtitleText = activeProj ? "freelance experience" : "Software Engineer \u00A0•\u00A0 UI/UX Designer \u00A0•\u00A0 AI Enthusiast"
   const isExpandedSubtitle = subtitleText === "freelance experience"
 
   return (
@@ -112,7 +123,13 @@ function HeroPage() {
         )}
       </AnimatePresence>
 
-      <div className="hero-content">
+      <motion.div 
+        className="hero-content"
+        animate={{ 
+          y: isPersonalInfoOpen ? -personalScrollY : 0 
+        }}
+        transition={{ duration: 0 }}
+      >
         <motion.div 
           className={`hero-title-group ${isExpanded ? 'expanded' : ''}`}
           initial={{ scale: 0.6, opacity: 0, x: '25vw' }}
@@ -391,20 +408,24 @@ function HeroPage() {
 
           <SocialButtons isOpen={isSocialsOpen || isPersonalInfoOpen} />
         </motion.div>
-      </div>
+      </motion.div>
 
       <ProjectCarousel 
         expandedProject={expandedProject} 
         isPersonalInfoOpen={isPersonalInfoOpen}
         isProjectInfoOpen={isProjectInfoOpen}
         onProjectClick={(id) => {
-          const isClosing = expandedProject === id
-          setExpandedProject(isClosing ? null : id)
-          if (isClosing) setIsProjectInfoOpen(false)
+          setExpandedProject(id)
         }} 
+        onToggleProjectInfo={() => {
+          setIsProjectInfoOpen((prev) => !prev)
+        }}
       />
 
-      <PersonalPage isOpen={isPersonalInfoOpen} />
+      <PersonalPage 
+        isOpen={isPersonalInfoOpen} 
+        onScroll={handlePersonalScroll} 
+      />
     </section>
   )
 }
