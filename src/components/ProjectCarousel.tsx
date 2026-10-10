@@ -60,15 +60,15 @@ export const PROJECTS: Project[] = [
 export const ACHIEVEMENT_DATA: Project[] = [
   {
     id: 101,
-    title: '',
+    title: 'Coming Soon!',
+    subtitle: 'Achievement',
     bg: '',
     video: '',
-  },
-  {
-    id: 102,
-    title: '',
-    bg: '',
-    video: '',
+    tag: 'Achievement',
+    description: 'Coming Soon!',
+    role: 'Coming Soon!',
+    status: 'Coming Soon!',
+    tech: 'Coming Soon!',
   }
 ];
 
@@ -81,6 +81,7 @@ export const PUBLICATION_DATA: Project[] = [
     bgFit: 'contain',
     bgColor: '#ffffff',
     bgPadding: '10%',
+    titleColor: '#111111',
     disableProgressive: true,
     video: '',
     tag: 'Publication',
@@ -182,15 +183,22 @@ export function ProjectCarousel({
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [category]);
+
   const currentData = category === 'achievement' ? ACHIEVEMENT_DATA
                     : category === 'publication' ? PUBLICATION_DATA
                     : PROJECTS;
 
-  // Jika jumlah project kurang dari atau sama dengan 3, kita gandakan di virtual render 
-  // agar animasi melingkar (atas & bawah) memiliki elemen DOM yang cukup untuk bertransisi mulus
-  const renderedProjects = currentData.length <= 3
-    ? [...currentData.map(p => ({...p, renderId: p.id + '_1'})), ...currentData.map(p => ({...p, renderId: p.id + '_2'}))]
-    : currentData.map(p => ({...p, renderId: p.id.toString()}));
+  // Jika item hanya 1 (misal publication), tidak digandakan dan tidak bisa di-scroll
+  const isSingleItem = currentData.length <= 1;
+
+  const renderedProjects = isSingleItem
+    ? currentData.map(p => ({...p, renderId: p.id.toString()}))
+    : (currentData.length <= 3
+        ? [...currentData.map(p => ({...p, renderId: p.id + '_1'})), ...currentData.map(p => ({...p, renderId: p.id + '_2'}))]
+        : currentData.map(p => ({...p, renderId: p.id.toString()})));
 
   const isAnyExpanded = expandedProject !== null;
   const activeExpandedProj = isAnyExpanded
@@ -199,7 +207,7 @@ export function ProjectCarousel({
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (isScrolling.current || expandedProject !== null || isPersonalInfoOpen) return;
+      if (isSingleItem || isScrolling.current || expandedProject !== null || isPersonalInfoOpen) return;
 
       if (e.deltaY > 40) {
         // Scroll down -> next project
@@ -219,7 +227,7 @@ export function ProjectCarousel({
       touchStartY = e.touches[0].clientY;
     };
     const handleTouchMove = (e: TouchEvent) => {
-      if (isScrolling.current || expandedProject !== null || isPersonalInfoOpen) return;
+      if (isSingleItem || isScrolling.current || expandedProject !== null || isPersonalInfoOpen) return;
       const touchEndY = e.touches[0].clientY;
       const diffY = touchStartY - touchEndY;
       
@@ -242,10 +250,11 @@ export function ProjectCarousel({
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
     };
-  }, [activeIndex, expandedProject, isPersonalInfoOpen, renderedProjects.length]);
+  }, [activeIndex, expandedProject, isPersonalInfoOpen, renderedProjects.length, isSingleItem]);
 
   // Fungsi untuk mendapatkan perbedaan indeks secara melingkar (circular)
   const getWrappedDiff = (i: number, active: number, length: number) => {
+    if (length <= 1) return 0;
     let diff = i - active;
     if (diff < -length / 2) diff += length;
     if (diff > length / 2) diff -= length;
@@ -552,53 +561,55 @@ export function ProjectCarousel({
         </div>
       </motion.div>
 
-      <motion.div
-        className="project-pagination-dots"
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ 
-          opacity: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 0 : 1, 
-          x: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 40 : 0 
-        }}
-        transition={{ 
-          delay: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 0 : (expandedProject === null ? 0.2 : 2.8), 
-          duration: 0.8,
-          ease: [0.16, 1, 0.3, 1]
-        }}
-        style={{ pointerEvents: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 'none' : 'auto' }}
-      >
-        {currentData.map((_, i) => {
-          const isDotActive = (activeIndex % currentData.length) === i;
-          return (
-            <span
-              key={i}
-              className={`dot ${isDotActive ? 'active' : ''}`}
-              onClick={() => {
-                if (isScrolling.current || expandedProject !== null) return;
-                if (isDotActive) return; // Already active
-                
-                isScrolling.current = true;
-                
-                // Calculate shortest path to the clicked dot
-                setActiveIndex((prev) => {
-                  const currentMod = prev % currentData.length;
-                  let diff = i - currentMod;
-                  // If wrapping around is shorter, adjust diff
-                  if (diff > currentData.length / 2) diff -= currentData.length;
-                  if (diff < -currentData.length / 2) diff += currentData.length;
+      {currentData.length > 1 && (
+        <motion.div
+          className="project-pagination-dots"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ 
+            opacity: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 0 : 1, 
+            x: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 40 : 0 
+          }}
+          transition={{ 
+            delay: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 0 : (expandedProject === null ? 0.2 : 2.8), 
+            duration: 0.8,
+            ease: [0.16, 1, 0.3, 1]
+          }}
+          style={{ pointerEvents: (expandedProject || isPersonalInfoOpen || isCategoryTransitioning) ? 'none' : 'auto' }}
+        >
+          {currentData.map((_, i) => {
+            const isDotActive = (activeIndex % currentData.length) === i;
+            return (
+              <span
+                key={i}
+                className={`dot ${isDotActive ? 'active' : ''}`}
+                onClick={() => {
+                  if (isScrolling.current || expandedProject !== null) return;
+                  if (isDotActive) return; // Already active
                   
-                  // Add diff to current index and wrap cleanly
-                  let next = (prev + diff) % renderedProjects.length;
-                  if (next < 0) next += renderedProjects.length;
-                  return next;
-                });
-                
-                setTimeout(() => (isScrolling.current = false), 1000);
-              }}
-              style={{ cursor: 'pointer' }}
-            />
-          );
-        })}
-      </motion.div>
+                  isScrolling.current = true;
+                  
+                  // Calculate shortest path to the clicked dot
+                  setActiveIndex((prev) => {
+                    const currentMod = prev % currentData.length;
+                    let diff = i - currentMod;
+                    // If wrapping around is shorter, adjust diff
+                    if (diff > currentData.length / 2) diff -= currentData.length;
+                    if (diff < -currentData.length / 2) diff += currentData.length;
+                    
+                    // Add diff to current index and wrap cleanly
+                    let next = (prev + diff) % renderedProjects.length;
+                    if (next < 0) next += renderedProjects.length;
+                    return next;
+                  });
+                  
+                  setTimeout(() => (isScrolling.current = false), 1000);
+                }}
+                style={{ cursor: 'pointer' }}
+              />
+            );
+          })}
+        </motion.div>
+      )}
     </>
   );
 }

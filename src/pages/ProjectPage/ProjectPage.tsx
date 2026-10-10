@@ -13,6 +13,7 @@ export interface Project {
   bgFit?: 'cover' | 'contain';
   bgColor?: string;
   bgPadding?: string;
+  titleColor?: string;
   disableProgressive?: boolean;
   video: string;
   tag?: string;
@@ -99,12 +100,13 @@ export function ProjectPage({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: isMobile ? '#9aa0a6' : '#9ca3af',
-          fontSize: '1.5rem',
-          fontWeight: 500,
+          color: isMobile ? '#6b7280' : '#4b5563',
+          fontSize: 'clamp(1.25rem, 1rem + 0.8vw, 1.75rem)',
+          fontWeight: 600,
+          letterSpacing: '-0.02em',
         }}
       >
-        {!project.bg && project.title}
+        {!project.bg && (project.title || 'Coming Soon!')}
       </div>
 
       {/* Background Image / Color */}
@@ -203,16 +205,19 @@ export function ProjectPage({
         document.body
       )}
 
-      {/* Judul di dalam kartu, hilang saat expanded */}
-      <div 
-        className="project-card-title" 
-        style={{ 
-          opacity: (isActive && !isExpanded) ? 1 : 0, 
-          transition: 'opacity 0.5s ease' 
-        }}
-      >
-        {project.title}
-      </div>
+      {/* Judul di dalam kartu, hilang saat expanded atau saat tidak ada background */}
+      {project.bg && (
+        <div 
+          className={`project-card-title ${project.bgColor === '#ffffff' || project.titleColor ? 'title-light-bg' : ''}`} 
+          style={{ 
+            opacity: (isActive && !isExpanded) ? 1 : 0, 
+            transition: 'opacity 0.5s ease',
+            ...(project.titleColor ? { color: project.titleColor } : {})
+          }}
+        >
+          {project.title}
+        </div>
+      )}
 
       {/* Project Info Overlay Page (hanya untuk desktop) */}
       <ProjectInfoPage 

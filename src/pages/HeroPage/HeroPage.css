@@ -314,6 +314,11 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.project-card-title.title-light-bg {
+  color: #111111;
+  text-shadow: none;
+}
+
 /* Titik-titik Navigasi (Tepat di tengah antara kartu project dan tepi layar) */
 .project-pagination-dots {
   position: absolute;
