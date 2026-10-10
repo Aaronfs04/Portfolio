@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { ProjectInfoPage } from '../ProjectInfoPage/ProjectInfoPage';
+import { ProgressiveImage, ProgressiveVideo } from '../../components/ProgressiveMedia';
 import './ProjectPage.css';
 
 export interface Project {
@@ -114,15 +115,15 @@ export function ProjectPage({
             }}
           />
         ) : (
-          <motion.img 
-            src={project.bg} 
-            alt={`${project.title} Background`} 
-            className="project-page-bg" 
+          <motion.div
+            className="project-page-bg"
             style={{
               opacity: isVisible ? 1 : 0,
               transition: 'opacity 0.8s ease',
             }}
-          />
+          >
+            <ProgressiveImage src={project.bg} alt={`${project.title} Background`} />
+          </motion.div>
         )
       )}
       
@@ -136,14 +137,7 @@ export function ProjectPage({
           }}
         >
           {isVisible && (
-            <video
-              src={project.video}
-              className="project-page-video"
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
+            <ProgressiveVideo src={project.video} className="project-page-video" />
           )}
         </motion.div>
       )}
