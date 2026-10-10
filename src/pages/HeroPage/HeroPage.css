@@ -78,12 +78,14 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 
   padding: 0;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.icon-btn:hover {
-  transform: translateY(-2px);
-  background-color: #fbfbfb;
+@media (hover: hover) {
+  .icon-btn:hover {
+    transform: translateY(-2px);
+    background-color: #fbfbfb;
+  }
 }
 
 .icon-btn:active {
@@ -95,11 +97,15 @@
   width: clamp(38px, 10px + 2.5vw, 62px);
   height: clamp(38px, 10px + 2.5vw, 62px);
   border-radius: clamp(10px, 0.8vw, 18px);
+  background-color: #ffffff;
+  color: #111111;
 }
 
 .shrink-btn .btn-icon {
   width: clamp(18px, 6px + 1.2vw, 28px);
   height: clamp(18px, 6px + 1.2vw, 28px);
+  stroke: #111111;
+  color: #111111;
 }
 
 .btn-icon {
@@ -131,11 +137,11 @@
   .hero-page {
     padding-left: 6vw;
     padding-right: 6vw;
-    padding-top: clamp(1.8rem, 4vh, 2.8rem);
-    padding-bottom: 2rem;
+    padding-top: clamp(1.4rem, 3.2vh, 2.2rem);
+    padding-bottom: 1.5rem;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 2rem;
+    gap: 0;
   }
   .hero-content {
     align-items: center;
@@ -146,11 +152,11 @@
     align-items: center;
     text-align: center;
     width: 100%;
-    gap: clamp(0.35rem, 1vw, 0.6rem);
+    gap: clamp(0.2rem, 0.6vw, 0.4rem);
   }
   .hero-buttons {
     position: fixed;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(135px, 16vh, 170px) - 30px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
     left: 50%;
     transform: translateX(-50%);
     width: calc((5 * clamp(46px, 10px + 3vw, 72px)) + (4 * clamp(6px, 0.5vw, 10px)));
@@ -166,14 +172,20 @@
   
   .hero-projects {
     width: 100%;
-    margin: clamp(4rem, 15vh, 8rem) 0 auto 0; /* Ensures the top 3D card doesn't bleed into the menu */
+    margin: clamp(5.8rem, 14.5vh, 9rem) 0 auto 0; /* Menaikkan posisi carousel sedikit secara presisi */
     transform: none;
+    transition: margin-top 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.36s;
   }
   
+  .hero-projects.expanded-mobile {
+    width: 100%;
+    margin-top: clamp(4.2rem, 10.5vh, 6rem);
+    transition: margin-top 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0s;
+  }
 
   /* Make background peek cards match main card size on mobile */
   .project-peek {
-    width: clamp(240px, 75vw, 350px);
+    width: clamp(230px, 68vw, 290px);
     aspect-ratio: 1 / 1;
   }
 }
@@ -225,6 +237,8 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .project-card {
@@ -240,12 +254,13 @@
   align-items: center;
   justify-content: center;
   transform-style: preserve-3d;
-  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform, width, height;
 }
 
 .project-card.expanded-mobile-card {
-  width: clamp(280px, 88vw, 390px) !important;
-  min-width: clamp(280px, 88vw, 390px) !important;
   max-width: none !important;
   flex-shrink: 0 !important;
 }
@@ -326,13 +341,8 @@
     width: 100%;
   }
 
-  .hero-buttons.expanded-mobile {
-    position: fixed !important;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px) !important;
-    left: 20px !important;
-    transform: none !important;
-    width: auto !important;
-    z-index: 99999 !important;
+  .project-card {
+    background-color: #dcdee2;
   }
 
   .shrink-btn.mobile-shrink {
@@ -341,9 +351,16 @@
     bottom: calc(env(safe-area-inset-bottom, 0px) + 20px) !important;
     right: 20px !important;
     left: auto !important;
-    transform: none !important;
     z-index: 99999 !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+    background-color: #ffffff !important;
+    color: #111111 !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .shrink-btn.mobile-shrink .btn-icon {
+    stroke: #111111 !important;
+    color: #111111 !important;
   }
 
   .mobile-see-live-btn {
@@ -371,9 +388,7 @@
     z-index: 99999 !important;
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
-    text-rendering: optimizeLegibility !important;
-    transform: translateZ(0);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease !important;
+    transition: background-color 0.2s ease !important;
   }
 
   .mobile-see-live-btn span {
@@ -453,12 +468,12 @@
 .mobile-expanded-info-card {
   position: relative;
   width: clamp(280px, 88vw, 390px);
-  height: clamp(180px, 31vh, 250px);
+  height: clamp(155px, 24vh, 205px);
   border-radius: clamp(22px, 5.5vw, 30px);
   background-color: #ffffff;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
-  padding: clamp(1rem, 3.5vw, 1.35rem);
+  padding: clamp(0.85rem, 3vw, 1.2rem);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -468,23 +483,23 @@
 }
 
 .mobile-expanded-info-tag {
-  font-size: clamp(0.7rem, 2.2vw, 0.82rem);
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
   font-weight: 600;
   color: #111111;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
 }
 
 .mobile-expanded-info-body {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .mobile-expanded-desc {
-  font-size: clamp(0.78rem, 2.6vw, 0.9rem);
-  line-height: 1.38;
+  font-size: clamp(0.74rem, 2.3vw, 0.85rem);
+  line-height: 1.35;
   color: #333333;
   margin: 0;
 }
@@ -492,13 +507,13 @@
 .mobile-expanded-meta {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  padding-top: 0.45rem;
+  gap: 0.25rem;
+  padding-top: 0.35rem;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .mobile-meta-row {
-  font-size: clamp(0.7rem, 2.2vw, 0.82rem);
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
   line-height: 1.35;
   color: #444444;
 }

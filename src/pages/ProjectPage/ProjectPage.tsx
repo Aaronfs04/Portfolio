@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { ProjectInfoPage } from '../ProjectInfoPage/ProjectInfoPage';
@@ -34,6 +34,18 @@ export function ProjectPage({
 }: ProjectPageProps) {
   const isVisible = isActive || isExpanded;
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => 
+    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+  );
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Mouse Follower Spring Physics in Viewport Screen Space
   const mouseX = useMotionValue(0);
@@ -42,14 +54,14 @@ export function ProjectPage({
   const springY = useSpring(mouseY, { damping: 28, stiffness: 450 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isVisible) return;
+    if (!isVisible || isMobile) return;
     mouseX.set(e.clientX);
     mouseY.set(e.clientY);
     if (!isHovered) setIsHovered(true);
   };
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isVisible) return;
+    if (!isVisible || isMobile) return;
     mouseX.set(e.clientX);
     mouseY.set(e.clientY);
     setIsHovered(true);
@@ -74,7 +86,7 @@ export function ProjectPage({
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: '#d1d5db',
+          backgroundColor: isMobile ? '#dcdee2' : '#d1d5db',
           opacity: isVisible && project.bg ? 0 : 1,
           transition: 'opacity 0.8s ease',
           zIndex: 2,
@@ -82,7 +94,7 @@ export function ProjectPage({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#9ca3af',
+          color: isMobile ? '#9aa0a6' : '#9ca3af',
           fontSize: '1.5rem',
           fontWeight: 500,
         }}
@@ -139,7 +151,7 @@ export function ProjectPage({
       {/* Interactive Viewport-Level Cursor Follower Chat Bubble */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
-          {isVisible && isHovered && (
+          {isVisible && isHovered && !isMobile && (
             <motion.div
               className="project-cursor-follower-wrapper"
               style={{

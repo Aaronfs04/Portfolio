@@ -112,6 +112,11 @@
   display: inline-block;
 }
 
-
-
-
+@media (max-width: 768px) {
+  .project-cursor-follower-wrapper {
+    display: none !important;
+  }
+  .project-page-container {
+    background-color: #dcdee2;
+  }
+}

@@ -90,9 +90,16 @@ function HeroPage() {
   const handleCloseProject = () => {
     setExpandedProject(null)
     setIsProjectInfoOpen(false)
-    setIsMobileButtonExited(false)
-    // Di mobile setelah kembali dari project detail, muncul 1 tombol dulu lalu terbuka otomatis
-    triggerSocialAutoOpen(isMobile ? 700 : 550)
+    if (isMobile) {
+      // Tunggu kartu selesai mengecil (360ms) dan mulai turun ke bawah, baru tombol contact naik kembali
+      setTimeout(() => {
+        setIsMobileButtonExited(false)
+      }, 360)
+      triggerSocialAutoOpen(950)
+    } else {
+      setIsMobileButtonExited(false)
+      triggerSocialAutoOpen(550)
+    }
   }
 
   // --- Magnetic Y Cursor untuk tombol Minimize ---
@@ -185,7 +192,7 @@ function HeroPage() {
 
   const heroButtonsNode = (
     <motion.div 
-      className={`hero-buttons ${isMobile && isExpanded ? 'expanded-mobile' : ''}`}
+      className="hero-buttons"
       style={{ display: 'flex', gap: 'clamp(6px, 0.5vw, 10px)' }}
     >
       <motion.div
@@ -199,8 +206,8 @@ function HeroPage() {
                 : (isExpanded ? 60 : 0))
         }}
         transition={{ 
-          duration: 0.7,
-          ease: [0.32, 0, 0.24, 1],
+          duration: isMobile ? 0.55 : 0.7,
+          ease: [0.22, 1, 0.36, 1],
           delay: (!initialEntered && buttonsVisible) ? 0.14 : 0
         }}
         style={{ pointerEvents: (buttonsVisible && !(isMobile && (isExpanded || isMobileButtonExited))) ? 'auto' : 'none' }}
@@ -219,8 +226,7 @@ function HeroPage() {
             }
           }}
           animate={{ 
-            backgroundColor: isSocialsOpen ? '#111' : '#fff',
-            color: isSocialsOpen ? '#fff' : '#111',
+            backgroundColor: isSocialsOpen ? '#111111' : '#ffffff',
             borderRadius: isSocialsOpen ? '50%' : '18px',
             width: (!isMobile && isExpanded && isProjectInfoOpen) ? 'clamp(116px, 9.5vw, 136px)' : 'clamp(46px, 10px + 3vw, 72px)',
             paddingLeft: (!isMobile && isExpanded && isProjectInfoOpen) ? 'clamp(16px, 1.2vw, 22px)' : 'clamp(0px, 0vw, 0px)',
@@ -245,7 +251,7 @@ function HeroPage() {
                 style={{ display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', fontWeight: 500, fontSize: 'clamp(0.85rem, 0.9vw, 0.95rem)', color: '#111' }}
               >
                 <span>See live</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 'clamp(14px, 1vw, 17px)', height: 'clamp(14px, 1vw, 17px)' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 'clamp(14px, 1vw, 17px)', height: 'clamp(14px, 1vw, 17px)' }}>
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                   <polyline points="15 3 21 3 21 9"></polyline>
                   <line x1="10" y1="14" x2="21" y2="3"></line>
@@ -261,7 +267,7 @@ function HeroPage() {
             transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
             style={{ width: 'clamp(46px, 10px + 3vw, 72px)', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: (!isMobile && isExpanded && isProjectInfoOpen) ? 'none' : 'auto' }}
           >
-            {/* Close Icon (X) */}
+            {/* Close Icon (X) - Selalu putih bersih di atas background gelap */}
             <motion.div
               initial={false}
               animate={{ 
@@ -271,12 +277,12 @@ function HeroPage() {
               transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
               style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <svg style={{ width: '36%', height: '36%' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg style={{ width: '36%', height: '36%' }} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </motion.div>
-            {/* Chat Icon & External Link Icon (wrapper) */}
+            {/* Chat Icon & External Link Icon (wrapper) - Selalu hitam pekat di atas background putih */}
             <motion.div
               initial={false}
               animate={{ 
@@ -299,10 +305,10 @@ function HeroPage() {
                   transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1], delay: !hasOpenedProject.current ? 0 : 0.1 }}
                   style={{ position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 20.5a8.5 8.5 0 1 0-6.8-3.4L4 20l2.9-1.2A8.4 8.4 0 0 0 12 20.5z" />
-                    <circle cx="9.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
-                    <circle cx="14.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
+                    <circle cx="9.5" cy="11.5" r="1.1" fill="#111111" stroke="none" />
+                    <circle cx="14.5" cy="11.5" r="1.1" fill="#111111" stroke="none" />
                   </svg>
                 </motion.div>
                 <motion.div
@@ -310,7 +316,7 @@ function HeroPage() {
                   transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1], delay: !hasOpenedProject.current ? 0 : 0.1 }}
                   style={{ position: 'absolute', top: '60px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                     <polyline points="15 3 21 3 21 9"></polyline>
                     <line x1="10" y1="14" x2="21" y2="3"></line>
@@ -332,20 +338,43 @@ function HeroPage() {
           <motion.button
             className={`icon-btn shrink-btn ${isMobile ? 'mobile-shrink' : ''}`}
             onClick={handleCloseProject}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ 
+              opacity: 0, 
+              y: isMobile ? 32 : 0, 
+              scale: isMobile ? 1 : 0.8 
+            }}
+            animate={{ 
+              opacity: 1, 
+              y: 0, 
+              scale: 1 
+            }}
+            exit={{ 
+              opacity: 0, 
+              y: isMobile ? 16 : 0, 
+              scale: isMobile ? 1 : 0.8,
+              transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] }
+            }}
+            transition={isMobile ? {
+              duration: 0.48,
+              ease: [0.22, 1, 0.36, 1],
+              delay: 0.45,
+            } : {
+              duration: 0.5,
+              ease: [0.16, 1, 0.3, 1],
+            }}
             style={{
               position: 'fixed',
               top: isMobile ? 'auto' : 0,
               left: (!isMobile && shrinkBtnLeft !== null) ? shrinkBtnLeft : undefined,
-              y: isMobile ? 0 : springY,
+              ...(isMobile ? {} : { y: springY }),
               zIndex: 99999,
+              color: '#111111',
+              backgroundColor: '#ffffff',
             }}
+            whileTap={{ scale: 0.96 }}
             aria-label="Minimize"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="btn-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="btn-icon">
               <polyline points="4 14 10 14 10 20" />
               <polyline points="20 10 14 10 14 4" />
               <line x1="14" y1="10" x2="21" y2="3" />
@@ -355,7 +384,7 @@ function HeroPage() {
         )}
       </AnimatePresence>
 
-      {/* Tombol See Live khusus Mobile */}
+      {/* Tombol See Live khusus Mobile - Muncul naik hanya setelah social button sudah beres turun */}
       <AnimatePresence>
         {isMobile && isExpanded && activeProj?.link && activeProj.link !== '#' && (
           <motion.button
@@ -365,10 +394,10 @@ function HeroPage() {
                 window.open(activeProj.link, '_blank', 'noopener,noreferrer')
               }
             }}
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
+            exit={{ opacity: 0, y: 16, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } }}
+            transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
             whileTap={{ scale: 0.96 }}
             aria-label="See Live"
           >
@@ -405,8 +434,8 @@ function HeroPage() {
           }}
           style={{ transformOrigin: isMobile ? "center center" : "left center" }}
           transition={{ 
-            duration: hasShifted ? 2.0 : 0.4, 
-            ease: [0.16, 1, 0.3, 1] 
+            duration: hasShifted ? (isExpanded ? 1.05 : 1.4) : 0.4, 
+            ease: [0.22, 1, 0.36, 1] 
           }}
         >
           {!isMobile && (
@@ -485,16 +514,16 @@ function HeroPage() {
         onProjectClick={(id) => {
           if (socialTimerRef.current) clearTimeout(socialTimerRef.current)
           if (isMobile) {
-            // Step 1: Menutup dulu untuk social buttonnya
+            // Step 1: Nutup dulu untuk social buttonnya
             setIsSocialsOpen(false)
-            // Step 2: Baru tombol meluncur turun ke bawah dengan smooth (setelah selesai menutup)
+            // Step 2: Tombol meluncur turun ke bawah dengan smooth dan santai (setelah selesai menutup ~350ms)
             setTimeout(() => {
               setIsMobileButtonExited(true)
-            }, 380)
+            }, 350)
             // Step 3: Detail project membesar ke atas
             setTimeout(() => {
               setExpandedProject(id)
-            }, 550)
+            }, 420)
           } else {
             setExpandedProject(id)
             setIsSocialsOpen(false)

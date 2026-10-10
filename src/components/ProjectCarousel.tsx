@@ -99,6 +99,30 @@ export function ProjectCarousel({
   // Responsiveness state
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [windowHeight, setWindowHeight] = useState(typeof window !== 'undefined' ? window.innerHeight : 800);
+  const isMobile = windowWidth <= 768;
+
+  // Track state saat memperkecil kartu di mobile (mengecil dulu -> baru turun kebawah)
+  const [lastExpanded, setLastExpanded] = useState<number | null>(expandedProject);
+  const [isMobileShrinking, setIsMobileShrinking] = useState(false);
+
+  if (lastExpanded !== expandedProject) {
+    if (isMobile && lastExpanded !== null && expandedProject === null) {
+      setIsMobileShrinking(true);
+    } else {
+      setIsMobileShrinking(false);
+    }
+    setLastExpanded(expandedProject);
+  }
+
+  useEffect(() => {
+    if (isMobileShrinking) {
+      const timer = setTimeout(() => {
+        setIsMobileShrinking(false);
+      }, 850);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobileShrinking]);
+
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -153,7 +177,6 @@ export function ProjectCarousel({
     ? [...currentData.map(p => ({...p, renderId: p.id + '_1'})), ...currentData.map(p => ({...p, renderId: p.id + '_2'}))]
     : currentData.map(p => ({...p, renderId: p.id.toString()}));
 
-  const isMobile = windowWidth <= 768;
   const isAnyExpanded = expandedProject !== null;
   const activeExpandedProj = isAnyExpanded
     ? (currentData.find(p => p.id === expandedProject) || PROJECTS.find(p => p.id === expandedProject))
@@ -230,15 +253,16 @@ export function ProjectCarousel({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        <div style={{ position: 'relative', width: windowWidth <= 768 ? 'clamp(240px, 75vw, 350px)' : 'clamp(260px, 24vw, 420px)', aspectRatio: '1 / 1', transformStyle: 'preserve-3d' }}>
+        <div style={{ position: 'relative', width: windowWidth <= 768 ? 'clamp(230px, 68vw, 290px)' : 'clamp(260px, 24vw, 420px)', aspectRatio: '1 / 1', transformStyle: 'preserve-3d' }}>
           {renderedProjects.map((proj, i) => {
             const diff = getWrappedDiff(i, activeIndex, renderedProjects.length);
             const isActive = diff === 0;
 
+            const isMobile = windowWidth <= 768;
             // Tentukan posisi 3D berdasarkan kedudukannya relatif terhadap activeIndex
-            // Menggunakan rumus silinder 3D untuk tumpukan dan animasi yang akurat
-            const radius = windowWidth < 768 ? 350 : (windowWidth < 1024 ? 320 : (windowWidth < 1440 ? 360 : (windowWidth < 1600 ? 420 : 540)));
-            const anglePerCard = 75; // Sudut per kartu dalam derajat
+            // Menggunakan radius 225 dan sudut 52deg di mobile agar tumpukan atas & bawah lebih renggang/melebar secara proporsional
+            const radius = isMobile ? 225 : (windowWidth < 1024 ? 320 : (windowWidth < 1440 ? 360 : (windowWidth < 1600 ? 420 : 540)));
+            const anglePerCard = isMobile ? 52 : 75; // Sudut per kartu dalam derajat
             const angle = diff * anglePerCard;
             const angleRad = angle * (Math.PI / 180);
 
@@ -251,8 +275,11 @@ export function ProjectCarousel({
             const isExpanded = expandedProject === proj.id && isActive;
             const isAnyExpanded = expandedProject !== null;
 
-            // Opacity: hilangkan kartu yang terlalu jauh di belakang atau saat yang lain di-expand atau saat personal info terbuka
-            let opacity = Math.abs(diff) >= 2 ? 0 : (Math.abs(diff) === 1 ? 0.75 : 1);
+            // Kartu di luar tumpukan aktif dan peeking (diff >= 2) disembunyikan sepenuhnya agar TIDAK ADA kartu di belakang kartu utama
+            const isTooFar = Math.abs(diff) >= 2;
+
+            // Opacity: hanya diff 0 (aktif) dan diff ±1 (tumpukan atas & bawah) yang tampil
+            let opacity = isTooFar ? 0 : (Math.abs(diff) === 1 ? (isMobile ? 0.78 : 0.75) : 1);
             if (isAnyExpanded && !isExpanded) opacity = 0;
             if (isPersonalInfoOpen) opacity = 0;
             
@@ -274,7 +301,6 @@ export function ProjectCarousel({
               ? (isMobile ? 1 : (windowWidth <= 1024 ? 1.55 : (windowWidth <= 1366 ? 1.6 : 1.75))) 
               : (isActive ? 1 : 0.95);
 
-            const isMobileStackCard = isMobile && diff !== 0;
             const mobileExitDistance = Math.round(Math.max(windowHeight * 0.9, 700));
 
             // Transisi khusus mobile saat project detail dibuka/ditutup:
@@ -283,7 +309,7 @@ export function ProjectCarousel({
             // 3. Gambar tengah (isActive & isExpanded) naik ke atas dan melebar ke samping secara perlahan (ukuran persis seperti sebelumnya)
             if (isMobile && isAnyExpanded) {
               if (isExpanded) {
-                animY = -110; // Naik ke posisi media card atas
+                animY = -90; // Naik ke posisi media card atas dengan jarak aman dari judul atas
                 animScale = 1; // Melebar ke samping via width & height, bukan diperbesar keseluruhan
                 animRotateX = 0;
                 animZ = 0;
@@ -322,11 +348,12 @@ export function ProjectCarousel({
                   left: 0,
                   width: '100%',
                   height: '100%',
-                  display: 'flex',
+                  display: isTooFar ? 'none' : 'flex',
+                  visibility: isTooFar ? 'hidden' : 'visible',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transformOrigin: 'center center',
-                  pointerEvents: (!isPersonalInfoOpen && !isCategoryTransitioning && (isActive || isExpanded)) ? 'auto' : 'none',
+                  pointerEvents: (!isPersonalInfoOpen && !isCategoryTransitioning && !isTooFar && (isActive || isExpanded)) ? 'auto' : 'none',
                   cursor: (!isPersonalInfoOpen && !isCategoryTransitioning && (isActive || isExpanded)) ? 'pointer' : 'default',
                 }}
                 onClick={() => {
@@ -348,31 +375,58 @@ export function ProjectCarousel({
                   opacity: opacity,
                   zIndex: zIndex,
                 }}
-                transition={{
-                  duration: isCategoryTransitioning 
-                    ? 0.65 
-                    : (isMobileStackCard ? 1.05 : 0.85),
-                  ease: isCategoryTransitioning 
-                    ? [0.32, 0, 0.24, 1] 
-                    : [0.16, 1, 0.3, 1],
-                }}
+                transition={isCategoryTransitioning ? {
+                  duration: 0.65,
+                  ease: [0.32, 0, 0.24, 1]
+                } : (isMobile ? (
+                  isMobileShrinking ? {
+                    // Tahap 2 saat menutup di mobile: Turun ke bawah setelah kartu selesai mengecil
+                    y: { duration: 0.48, delay: 0.36, ease: [0.22, 1, 0.36, 1] },
+                    x: { duration: 0.48, delay: 0.36, ease: [0.22, 1, 0.36, 1] },
+                    z: { duration: 0.48, delay: 0.36, ease: [0.22, 1, 0.36, 1] },
+                    rotateX: { duration: 0.48, delay: 0.36, ease: [0.22, 1, 0.36, 1] },
+                    scale: { duration: 0.48, delay: 0.36, ease: [0.22, 1, 0.36, 1] },
+                    opacity: { duration: 0.40, delay: 0.36, ease: [0.22, 1, 0.36, 1] },
+                  } : {
+                    y: { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
+                    x: { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
+                    z: { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
+                    rotateX: { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
+                    scale: { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
+                    opacity: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
+                  }
+                ) : {
+                  duration: isAnyExpanded ? 1.05 : 0.85,
+                  ease: [0.22, 1, 0.36, 1],
+                })}
               >
                 <motion.div
                   className={`project-card ${isMobile && isExpanded ? 'expanded-mobile-card' : ''}`}
                   id={isExpanded ? "expanded-project-card" : undefined}
                   animate={{
                     width: (isMobile && isExpanded) ? 'clamp(280px, 88vw, 390px)' : '100%',
-                    height: (isMobile && isExpanded) ? 'clamp(200px, 34vh, 270px)' : '100%',
+                    height: (isMobile && isExpanded) ? 'clamp(175px, 26vh, 225px)' : '100%',
                     borderRadius: (isMobile && isExpanded) ? 'clamp(22px, 5.5vw, 30px)' : 'clamp(24px, 6vw, 36px)',
                   }}
-                  transition={{
-                    duration: 0.85,
-                    ease: [0.16, 1, 0.3, 1],
+                  transition={isMobile ? (
+                    isExpanded ? {
+                      // Tahap 2 saat membuka di mobile: Baru membuka ke samping setelah kartu naik ke atas
+                      width: { duration: 0.55, delay: 0.38, ease: [0.22, 1, 0.36, 1] },
+                      height: { duration: 0.55, delay: 0.38, ease: [0.22, 1, 0.36, 1] },
+                      borderRadius: { duration: 0.55, delay: 0.38, ease: [0.22, 1, 0.36, 1] },
+                    } : {
+                      // Tahap 1 saat menutup di mobile: Langsung mengecil duluan ke ukuran normal tanpa delay
+                      width: { duration: 0.36, delay: 0, ease: [0.22, 1, 0.36, 1] },
+                      height: { duration: 0.36, delay: 0, ease: [0.22, 1, 0.36, 1] },
+                      borderRadius: { duration: 0.36, delay: 0, ease: [0.22, 1, 0.36, 1] },
+                    }
+                  ) : {
+                    duration: isAnyExpanded ? 1.05 : 0.85,
+                    ease: [0.22, 1, 0.36, 1],
                   }}
                   style={{
                     flexShrink: 0,
                     maxWidth: 'none',
-                    minWidth: (isMobile && isExpanded) ? 'clamp(280px, 88vw, 390px)' : undefined,
                     x: (isActive && !isExpanded) ? cardX : 0,
                     y: (isActive && !isExpanded) ? cardY : 0,
                   }}
@@ -401,12 +455,12 @@ export function ProjectCarousel({
                   opacity: 0, 
                   clipPath: 'inset(0% 0% 100% 0% round 24px)', 
                   y: -16,
-                  transition: { duration: 0.35, ease: [0.25, 1, 0.5, 1], delay: 0 } 
+                  transition: { duration: 0.22, ease: [0.25, 1, 0.5, 1], delay: 0 } 
                 }}
-                transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1], delay: 0.52 }}
+                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.55 }}
                 style={{
                   position: 'absolute',
-                  top: 'calc(50% + clamp(26px, 3.8vh, 42px))',
+                  top: 'calc(50% + clamp(36px, 4.6vh, 44px))',
                   left: '50%',
                   x: '-50%',
                   transformOrigin: 'top center',
