@@ -10,6 +10,10 @@ export interface Project {
   title: string;
   subtitle?: string;
   bg: string;
+  bgFit?: 'cover' | 'contain';
+  bgColor?: string;
+  bgPadding?: string;
+  disableProgressive?: boolean;
   video: string;
   tag?: string;
   description?: string;
@@ -118,11 +122,34 @@ export function ProjectPage({
           <motion.div
             className="project-page-bg"
             style={{
-              opacity: isVisible ? 1 : 0,
-              transition: 'opacity 0.8s ease',
+              backgroundColor: project.bgColor || 'transparent',
+              opacity: (project.disableProgressive || isVisible) ? 1 : 0,
+              padding: project.bgPadding || '0',
+              boxSizing: 'border-box',
+              transition: project.disableProgressive ? 'none' : 'opacity 0.8s ease',
             }}
           >
-            <ProgressiveImage src={project.bg} alt={`${project.title} Background`} />
+            {project.disableProgressive ? (
+              <img 
+                src={project.bg} 
+                alt={`${project.title} Background`} 
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: project.bgFit || 'cover',
+                  display: 'block',
+                  imageRendering: 'high-quality' as any,
+                  WebkitBackfaceVisibility: 'hidden',
+                }} 
+              />
+            ) : (
+              <ProgressiveImage 
+                src={project.bg} 
+                alt={`${project.title} Background`} 
+                objectFit={project.bgFit} 
+                disableProgressive={false}
+              />
+            )}
           </motion.div>
         )
       )}

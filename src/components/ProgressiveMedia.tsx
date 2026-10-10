@@ -6,43 +6,59 @@ interface ProgressiveImageProps {
   alt: string;
   className?: string;
   style?: CSSProperties;
+  objectFit?: 'cover' | 'contain';
+  disableProgressive?: boolean;
 }
 
-export function ProgressiveImage({ src, alt, className, style }: ProgressiveImageProps) {
+export function ProgressiveImage({ src, alt, className, style, objectFit = 'cover', disableProgressive = false }: ProgressiveImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const tinySrc = src.replace(/\.(png|jpg|jpeg|webp)$/, '-tiny.jpg');
 
   useEffect(() => {
+    if (disableProgressive) {
+      setIsLoaded(true);
+      return;
+    }
+
     if (imgRef.current && imgRef.current.complete) {
       setIsLoaded(true);
     }
-  }, [src]);
+    
+    // Fallback in case onLoad doesn't fire due to cache issues
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [src, disableProgressive]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       {/* Blurred thumbnail placeholder */}
-      <motion.img
-        src={tinySrc}
-        alt={alt + ' placeholder'}
-        className={className}
-        style={{
-          ...style,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          filter: 'blur(20px)',
-          transform: 'scale(1.1)',
-          pointerEvents: 'none',
-          zIndex: 1,
-        }}
-        initial={{ opacity: 1 }}
-        animate={{ opacity: isLoaded ? 0 : 1 }}
-        transition={{ duration: 0.6, ease: 'easeInOut' }}
-      />
+      {!disableProgressive && (
+        <motion.img
+          src={tinySrc}
+          alt={alt + ' placeholder'}
+          className={className}
+          style={{
+            ...style,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: objectFit,
+            filter: 'blur(20px)',
+            transform: 'scale(1.1)',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: isLoaded ? 0 : 1 }}
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
+        />
+      )}
       {/* Actual High Res Image */}
       <img
         ref={imgRef}
@@ -50,6 +66,7 @@ export function ProgressiveImage({ src, alt, className, style }: ProgressiveImag
         alt={alt}
         className={className}
         onLoad={() => setIsLoaded(true)}
+        onError={() => setIsLoaded(true)}
         style={{
           ...style,
           position: 'absolute',
@@ -57,9 +74,10 @@ export function ProgressiveImage({ src, alt, className, style }: ProgressiveImag
           left: 0,
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
-          filter: isLoaded ? 'none' : 'blur(10px)',
-          transition: 'filter 0.5s ease',
+          objectFit: objectFit,
+          transition: disableProgressive ? 'none' : 'opacity 0.5s ease',
+          opacity: (disableProgressive || isLoaded) ? 1 : 0,
+          imageRendering: 'high-quality' as any,
         }}
       />
     </div>

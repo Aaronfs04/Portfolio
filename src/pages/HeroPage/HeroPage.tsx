@@ -467,7 +467,7 @@ function HeroPage() {
           <motion.div 
             style={{ position: 'relative', overflow: 'hidden' }}
             animate={{
-              height: isExpanded ? 'clamp(2.4rem, 1.4rem + 2.2vw, 3.8rem)' : 'clamp(1.2rem, 0.9rem + 0.4vw, 1.6rem)'
+              height: 'auto'
             }}
             transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
           >

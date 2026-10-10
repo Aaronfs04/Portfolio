@@ -42,6 +42,19 @@ export const PROJECTS: Project[] = [
     tech: "Typescript, Vite, CSS, React",
     link: import.meta.env.VITE_PROJECT_SKINMATE_URL || 'https://skinmateai.vercel.app/',
   },
+  {
+    id: 4,
+    title: 'Brain Tumor Classification',
+    subtitle: 'Class Project',
+    bg: '#1a1a1a',
+    video: '/assets/brainTumor/BrainTumor.mp4',
+    tag: 'Information',
+    description: 'A brain tumor classifier (95.19% accuracy) that shows its reasoning through heatmaps, helping clinicians verify and trust AI-assisted MRI analysis.',
+    role: "AI Developer",
+    status: "Completed",
+    tech: "Python, EfficientNetB1, Grad-CAM, CNN",
+    link: import.meta.env.VITE_PROJECT_BRAIN_TUMOR_URL || 'https://github.com/Aaronfs04/Brain_Tumor',
+  }
 ];
 
 export const ACHIEVEMENT_DATA: Project[] = [
@@ -62,15 +75,17 @@ export const ACHIEVEMENT_DATA: Project[] = [
 export const PUBLICATION_DATA: Project[] = [
   {
     id: 201,
-    title: '',
-    bg: '',
+    title: 'Brain Tumor Paper',
+    subtitle: 'Publication',
+    bg: '/assets/PublishBrainTumor/PaperCerti.webp',
+    bgFit: 'contain',
+    bgColor: '#ffffff',
+    bgPadding: '10%',
+    disableProgressive: true,
     video: '',
-  },
-  {
-    id: 202,
-    title: '',
-    bg: '',
-    video: '',
+    tag: 'Publication',
+    description: 'Publication certificate for Brain Tumor Classification.',
+    link: import.meta.env.VITE_PUBLICATION_BRAIN_TUMOR_URL || 'https://share.google/AjBVxxEphOc2bXrbu',
   }
 ];
 
@@ -401,7 +416,7 @@ export function ProjectCarousel({
                 })}
               >
                 <motion.div
-                  className={`project-card ${isMobile && isExpanded ? 'expanded-mobile-card' : ''}`}
+                  className={`project-card ${isMobile && isExpanded ? 'expanded-mobile-card' : ''} ${isExpanded ? 'is-expanded' : ''}`}
                   id={isExpanded ? "expanded-project-card" : undefined}
                   animate={{
                     width: (isMobile && isExpanded) ? 'clamp(280px, 88vw, 390px)' : '100%',
@@ -497,6 +512,38 @@ export function ProjectCarousel({
                         </div>
                       )}
                     </div>
+                  )}
+                  
+                  {activeExpandedProj.tag === 'Publication' && activeExpandedProj.bg && (
+                    <a 
+                      href={activeExpandedProj.bg} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="mobile-meta-row"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        marginTop: '0.5rem',
+                        padding: '0.6rem 0.9rem',
+                        backgroundColor: '#111111',
+                        color: '#ffffff',
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        fontSize: '0.8rem',
+                        textAlign: 'center',
+                        letterSpacing: '0.01em',
+                      }}
+                    >
+                      <span>View Full Certificate</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '13px', height: '13px' }}>
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                    </a>
                   )}
                 </div>
               </motion.div>

@@ -39,6 +39,11 @@
   pointer-events: none;
 }
 
+.project-page-bg img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+}
+
 .project-page-video-wrapper {
   position: relative;
   width: 75%;

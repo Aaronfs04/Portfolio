@@ -265,6 +265,16 @@
   flex-shrink: 0 !important;
 }
 
+.project-card.is-expanded {
+  transform: none;
+  transform-style: flat;
+}
+
+.project-card img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+}
+
 .project-card-bg {
   position: absolute;
   top: 0;
