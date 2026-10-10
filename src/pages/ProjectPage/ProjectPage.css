@@ -42,6 +42,7 @@
 .project-page-video-wrapper {
   position: relative;
   width: 75%;
+  aspect-ratio: 16 / 9;
   border-radius: 6px;
   overflow: hidden;
   z-index: 2;
