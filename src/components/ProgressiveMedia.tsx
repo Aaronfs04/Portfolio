@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { motion } from 'framer-motion';
 
 interface ProgressiveImageProps {
   src: string;
   alt: string;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 export function ProgressiveImage({ src, alt, className, style }: ProgressiveImageProps) {
@@ -54,7 +54,7 @@ export function ProgressiveImage({ src, alt, className, style }: ProgressiveImag
 interface ProgressiveVideoProps {
   src: string;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 export function ProgressiveVideo({ src, className, style }: ProgressiveVideoProps) {
